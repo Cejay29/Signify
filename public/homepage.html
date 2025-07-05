@@ -12,19 +12,26 @@
 <body>
   <div class="menu">
     <h2 class="logo">Signify</h2>
-    <button class="menu-btn active" onclick="window.location.href='homepage.html'">
+    <button class="menu-btn active">
       <img src="learn.png" class="learn">LEARN
     </button>
     <button class="menu-btn" onclick="window.location.href='alphabet.html'">
       <img src="letter.png" class="letter">ALPHABET & MORE
     </button>
-    <button class="menu-btn" onclick="window.location.href='shop.html'">
+    <button class="menu-btn">
       <img src="shop.png" class="shop">SHOP
     </button>
-    <button class="menu-btn" onclick="window.location.href='profile.html'">
-      <img src="profile.png" class="profile">PROFILE</button>
     <button class="menu-btn">
-      <img src="more.png" class="more">MORE</button>
+      <img src="profile.png" class="profile">PROFILE</button>
+
+    <div class="menu-dropdown">
+      <button class="menu-btn">
+        <img src="more.png" class="more">MORE
+      </button>
+      <div class="dropdown-content">
+        <button class="logout-btn">LOG OUT</button>
+      </div>
+    </div>
   </div>
 
   <div class="main-content">
@@ -120,8 +127,6 @@
       }
     });
   </script>
-
-
 </body>
 
 </html>

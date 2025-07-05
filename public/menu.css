@@ -397,3 +397,93 @@ body {
   width: 36px;
   object-fit: contain;
 }
+
+.tab-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  margin-top: 40px;
+  margin-right: 250px;
+  border-bottom: 2px solid #3A3A4D;
+  padding-bottom: 10px;
+  background-color: transparent;
+}
+
+.tab {
+  position: relative;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #a0a0a0;
+  cursor: pointer;
+  padding: 10px 20px;
+  /* equal spacing helps with underline consistency */
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.tab::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+  border-radius: 2px;
+}
+
+.tab.active {
+  color: #A9A9FF;
+}
+
+.tab.active::after {
+  background-color: #C5CAFF;
+}
+
+.tab:hover {
+  color: #A9A9FF;
+}
+
+.tab:hover::after {
+  background-color: #A9A9FF;
+}
+
+.menu-dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 5rem;
+  background-color: #1C1B2E;
+  border: 1px solid #C5CAFF;
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.menu-dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.logout-btn {
+  background-color: transparent;
+  color: #C5CAFF;
+  font-weight: 600;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
