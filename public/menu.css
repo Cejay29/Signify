@@ -17,7 +17,7 @@ body {
 }
 
 .logo {
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 700;
   color: #FFC400;
   margin-bottom: 20px;
@@ -25,17 +25,50 @@ body {
 }
 
 .menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: transparent;
   border: none;
   color: white;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   text-align: left;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  height: 3rem;
+  height: auto;
+}
+
+.learn {
+  height: 50px;
+  width: 50px;
+  object-fit: contain;
+}
+
+.letter {
+  height: 50px;
+  width: 50px;
+  object-fit: contain;
+}
+
+.shop {
+  height: 50px;
+  width: 50px;
+  object-fit: contain;
+}
+
+.profile {
+  height: 50px;
+  width: 50px;
+  object-fit: contain;
+}
+
+.more {
+  height: 50px;
+  width: 50px;
+  object-fit: contain;
 }
 
 .menu-btn:hover {
@@ -47,7 +80,7 @@ body {
   color: #C5CAFF;
   background: transparent;
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .section-wrapper {
@@ -135,9 +168,17 @@ body {
 }
 
 @keyframes floatUpDown {
-  0% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-6px); }
-  100% { transform: translateX(-50%) translateY(0); }
+  0% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-6px);
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .level {
@@ -228,7 +269,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10rem; /* ← Adjust this value as needed */
+  margin-right: 10rem;
+  /* ← Adjust this value as needed */
 }
 
 
@@ -250,8 +292,10 @@ body {
   fill: none;
   stroke: #C5CAFF;
   stroke-width: 10;
-  stroke-dasharray: 230; /* 2πr where r = 55 */
-  stroke-dashoffset: 86; /* adjust this to control how much of the ring shows */
+  stroke-dasharray: 230;
+  /* 2πr where r = 55 */
+  stroke-dashoffset: 86;
+  /* adjust this to control how much of the ring shows */
   transition: stroke-dashoffset 0.35s;
 }
 
@@ -263,7 +307,8 @@ body {
 
 .level-popup {
   position: absolute;
-  top: 140px; /* adjust based on your layout */
+  top: 140px;
+  /* adjust based on your layout */
   left: 20%;
   transform: translateX(-50%);
   background: #A9A9FF;
@@ -309,7 +354,7 @@ body {
   border: none;
   cursor: pointer;
   font-size: 0.8rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .popup-btn:hover {
@@ -327,3 +372,28 @@ body {
   pointer-events: none;
 }
 
+.top-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: absolute;
+  top: 80px;
+  right: 120px;
+  z-index: 100;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 1.4rem;
+  /* Bigger text */
+}
+
+.stat img {
+  height: 36px;
+  width: 36px;
+  object-fit: contain;
+}

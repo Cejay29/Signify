@@ -12,14 +12,40 @@
 <body>
   <div class="menu">
     <h2 class="logo">Signify</h2>
-    <button class="menu-btn active">LEARN</button>
-    <button class="menu-btn">ALPHABET & MORE</button>
-    <button class="menu-btn">SHOP</button>
-    <button class="menu-btn">PROFILE</button>
-    <button class="menu-btn">MORE</button>
+    <button class="menu-btn active">
+      <img src="learn.png" class="learn">LEARN
+    </button>
+    <button class="menu-btn">
+      <img src="letter.png" class="letter">ALPHABET & MORE
+    </button>
+    <button class="menu-btn">
+      <img src="shop.png" class="shop">SHOP
+    </button>
+    <button class="menu-btn">
+      <img src="profile.png" class="profile">PROFILE</button>
+    <button class="menu-btn">
+      <img src="more.png" class="more">MORE</button>
   </div>
 
   <div class="main-content">
+    <div class="top-stats-bar">
+      <div class="stat">
+        <img src="flag.png" alt="US Flag" />
+      </div>
+      <div class="stat">
+        <img src="fire.png" alt="Streak" />
+        <span>1</span>
+      </div>
+      <div class="stat">
+        <img src="gem.png" alt="Gems" />
+        <span>200</span>
+      </div>
+      <div class="stat">
+        <img src="heart.png" alt="Hearts" />
+        <span>5</span>
+      </div>
+    </div>
+
     <div class="section-wrapper">
       <div class="section1">
         <p class="section-label">SECTION 1, UNIT 1</p>
@@ -70,30 +96,30 @@
     </div>
   </div>
 
- <script>
-  const level1 = document.getElementById("level1-btn");
-  const popup = document.getElementById("level1-popup");
-  const startLabel = document.getElementById("start-label");
+  <script>
+    const level1 = document.getElementById("level1-btn");
+    const popup = document.getElementById("level1-popup");
+    const startLabel = document.getElementById("start-label");
 
-  level1.addEventListener("click", (e) => {
-    e.stopPropagation();
+    level1.addEventListener("click", (e) => {
+      e.stopPropagation();
 
-    if (popup.classList.contains("hidden")) {
-      popup.classList.remove("hidden");
-      startLabel.classList.add("hidden");
-    } else {
-      popup.classList.add("hidden");
-      startLabel.classList.remove("hidden");
-    }
-  });
+      if (popup.classList.contains("hidden")) {
+        popup.classList.remove("hidden");
+        startLabel.classList.add("hidden");
+      } else {
+        popup.classList.add("hidden");
+        startLabel.classList.remove("hidden");
+      }
+    });
 
-  document.addEventListener("click", (e) => {
-    if (!popup.contains(e.target) && !level1.contains(e.target)) {
-      popup.classList.add("hidden");
-      startLabel.classList.remove("hidden");
-    }
-  });
-</script>
+    document.addEventListener("click", (e) => {
+      if (!popup.contains(e.target) && !level1.contains(e.target)) {
+        popup.classList.add("hidden");
+        startLabel.classList.remove("hidden");
+      }
+    });
+  </script>
 
 
 </body>
