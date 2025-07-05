@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="signup.css" />
+</head>
+
+<body>
+    <div class="background">
+        <img src="bg/shape-bottom-kanan.png" class="bg-shape bottom-right" alt="">
+        <img src="bg/shape-bottom-left.png" class="bg-shape bottom-left">
+        <img src="bg/shape-top-left.png" class="bg-shape top-left" alt="">
+        <img src="bg/shape-top-right.png" class="bg-shape top-right" alt="">
+        <img src="bg/shape-center.png" class="bg-shape center" alt="">
+        <img src="bg/shape-center-bot.png" class="bg-shape cenbot" alt="">
+
+        <div class="form-container">
+            <button class="close-btn" onclick="window.location.href='homepage.html'">✕</button>
+            <h1>Sign up</h1>
+            <div class="card">
+                <h2>Create a new account</h2>
+                <p>Start your journey to sign fluency now!</p>
+                <form>
+                    <label for="first-name">First Name</label>
+                    <div class="name-row">
+                        <input type="text" id="first-name" placeholder="First name" />
+                        <input type="text" id="last-name" placeholder="Last name" />
+                    </div>
+                    <label for="last-name" class="visually-hidden">Last Name</label>
+
+                    <label>Birthday</label>
+                    <div class="row">
+                        <select name="month" id="month">
+                            <option>Month</option>
+                        </select>
+                        <select name="day" id="day">
+                            <option>Day</option>
+                        </select>
+                        <select name="year" id="year">
+                            <option>Year</option>
+                        </select>
+                    </div>
+
+                    <label>Gender</label>
+                    <div class="row">
+                        <button type="button" class="gender-btn">Female</button>
+                        <button type="button" class="gender-btn">Male</button>
+                        <button type="button" class="gender-btn">Other</button>
+                    </div>
+
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Email" />
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Password" />
+
+                    <button class="submit-btn">Sign Up</button>
+                    <a href="login.html" class="login-text">Already have an account?</a>
+                </form> 
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

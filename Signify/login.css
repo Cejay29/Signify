@@ -1,0 +1,168 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: #0E0A3A;
+    position: relative;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bg-shape {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.bottom-right {
+    bottom: 0;
+    right: 0;
+    width: 350px;
+    opacity: 20%;
+}
+
+.bottom-left {
+    bottom: 0;
+    left: 0;
+    width: 400px;
+    opacity: 80%;
+}
+
+.top-left {
+    top: 0;
+    left: 0;
+    width: 350px;
+}
+
+.top-right {
+    top: 0;
+    right: 0;
+    width: 350px;
+}
+
+.center {
+    top: 210px;
+    left: 35%;
+    width: 500px;
+    transform: rotate(-10deg);
+}
+
+.cenbot {
+    bottom: -130px;
+    left: 35%;
+    width: 500px;
+    opacity: 100%;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    text-align: center;
+    color: white;
+}
+
+.close-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 1.8rem;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.login-box {
+    background: transparent;
+    padding: 2rem;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* center the fields inside */
+}
+
+
+.login-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.input-field {
+    width: 400px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    outline: none;
+    color: #0a0035;
+}
+
+.password-container {
+    position: relative;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #0a0035;
+}
+
+.login-btn {
+    width: 400px;
+    background: linear-gradient(to right, #4ec3ff, #2e9fe6);
+    border: none;
+    padding: 0.9rem;
+    border-radius: 12px;
+    color: black;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    box-shadow: 0 5px 0 #1c6fa5;
+    cursor: pointer;
+}
+
+.forgot {
+    font-size: 0.9rem;
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    color: #d3d3ff;
+    text-decoration: none;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #555;
+    margin: 1rem 0;
+}
+
+.create-btn {
+    width: 400px;
+    background-color: #d6d6ff;
+    color: #0a0035;
+    font-weight: bold;
+    border: 1px solid #8282ff;
+    padding: 0.9rem;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 rgba(138, 138, 255, 0.4);
+}
+

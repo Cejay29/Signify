@@ -1,0 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #0c0731;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.bg-shape {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.bottom-right {
+    bottom: 0;
+    right: 0;
+    width: 350px;
+    opacity: 20%;
+}
+
+.bottom-left {
+    bottom: 0;
+    left: 0;
+    width: 400px;
+    opacity: 80%;
+}
+
+.top-left {
+    top: 0;
+    left: 0;
+    width: 350px;
+}
+
+.top-right {
+    top: 0;
+    right: 0;
+    width: 350px;
+}
+
+.center {
+    top: 210px;
+    left: 35%;
+    width: 500px;
+    transform: rotate(-10deg);
+}
+
+.cenbot {
+    bottom: -130px;
+    left: 35%;
+    width: 500px;
+    opacity: 100%;
+}
+
+.close-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 1.8rem;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.background {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    opacity: 0.4;
+    z-index: 0;
+}
+
+.blob1 {
+    top: 0;
+    left: 0;
+    width: 300px;
+}
+
+.blob2 {
+    bottom: 0;
+    right: 0;
+    width: 300px;
+}
+
+.form-container {
+    position: relative;
+    z-index: 1;
+    color: white;
+    text-align: center;
+    margin-top: 90px;
+}
+
+.form-container h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.card {
+    background-color: #f3f3f3;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 400px;
+    margin: 0 auto;
+    color: black;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.card p {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #5e5e5e;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #333;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.name-row,
+.row {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.name-row input,
+.row select {
+    flex: 1;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.gender-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 6px;
+    border: none;
+    background-color: #d9d9d9;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.gender-btn:hover {
+    background-color: #bfbfbf;
+}
+
+.submit-btn {
+    background: linear-gradient(to right, #d3ccff, #d2cdff);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 1.5rem;
+}
+
+.login-text {
+    font-size: 0.85rem;
+    color: #333;
+    margin-top: 1rem;
+}
+
+/* Optional: hide visually-hidden elements */
+.visually-hidden {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}

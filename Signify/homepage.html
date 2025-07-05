@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="menu.css" />
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="menu">
+    <h2 class="logo">Signify</h2>
+    <button class="menu-btn active">LEARN</button>
+    <button class="menu-btn">ALPHABET & MORE</button>
+    <button class="menu-btn">SHOP</button>
+    <button class="menu-btn">PROFILE</button>
+    <button class="menu-btn">MORE</button>
+  </div>
+
+  <div class="main-content">
+    <div class="section-wrapper">
+      <div class="section1">
+        <p class="section-label">SECTION 1, UNIT 1</p>
+        <h3 class="section-title">Order food</h3>
+      </div>
+
+      <div class="start-container">
+        <div class="start-label" id="start-label">START</div>
+        <div class="progress-circle-wrapper">
+          <svg class="progress-ring" width="120" height="120">
+            <circle class="progress-ring-bg" cx="60" cy="60" r="55" />
+            <circle class="progress-ring-bar" cx="60" cy="60" r="55" />
+          </svg>
+          <button class="level level1" id="level1-btn">
+            <img src="star.png" class="star" />
+          </button>
+        </div>
+        <div class="level-popup hidden" id="level1-popup">
+          <div class="popup-arrow"></div>
+          <div class="popup-content">
+            <p class="popup-title">Order food</p>
+            <p class="popup-subtitle">Lesson 1 of 3</p>
+            <button class="popup-btn">START + 10XP • + 20 GEMS</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="level level2">
+        <img src="star.png" class="star" />
+      </button>
+      <button class="level level3">
+        <img src="star.png" class="star" />
+      </button>
+      <button class="level level4">
+        <img src="star.png" class="star" />
+      </button>
+      <button class="level level5">
+        <img src="star.png" class="star" />
+      </button>
+
+      <div class="coming-soon-wrapper">
+        <div class="coming-soon">
+          <span class="line"></span>
+          <span class="text">Coming Soon</span>
+          <span class="line"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ <script>
+  const level1 = document.getElementById("level1-btn");
+  const popup = document.getElementById("level1-popup");
+  const startLabel = document.getElementById("start-label");
+
+  level1.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    if (popup.classList.contains("hidden")) {
+      popup.classList.remove("hidden");
+      startLabel.classList.add("hidden");
+    } else {
+      popup.classList.add("hidden");
+      startLabel.classList.remove("hidden");
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!popup.contains(e.target) && !level1.contains(e.target)) {
+      popup.classList.add("hidden");
+      startLabel.classList.remove("hidden");
+    }
+  });
+</script>
+
+
+</body>
+
+</html>

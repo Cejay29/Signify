@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Signify</title>
+    <link rel="stylesheet" href="login.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+    <img src="bg/shape-bottom-kanan.png" class="bg-shape bottom-right" alt="">
+    <img src="bg/shape-bottom-left.png" class="bg-shape bottom-left">
+    <img src="bg/shape-top-left.png" class="bg-shape top-left" alt="">
+    <img src="bg/shape-top-right.png" class="bg-shape top-right" alt="">
+    <img src="bg/shape-center.png" class="bg-shape center" alt="">
+    <img src="bg/shape-center-bot.png" class="bg-shape cenbot" alt="">
+    <div class="container">
+        <button class="close-btn" onclick="window.location.href='homepage.html'">✕</button>
+        <div class="login-box">
+            <h2 class="login-title">Log in</h2>
+            <form>
+                <input type="text" placeholder="Email or username" class="input-field" required />
+                <div class="password-container">
+                    <input type="password" placeholder="Password" class="input-field" required />
+                </div>
+                <button type="submit" class="login-btn">LOG IN</button>
+                <a href="#" class="forgot">Forgot Password?</a>
+                <hr />
+                <button type="button" onclick="window.location.href='signup.html'" class="create-btn">Create an Account</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
