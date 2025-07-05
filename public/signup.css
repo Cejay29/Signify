@@ -169,20 +169,56 @@ select {
     box-sizing: border-box;
 }
 
-.gender-btn {
+input[type="date"] {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.gender-label{
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #333;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.gender-options {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.gender-options label {
     flex: 1;
     padding: 0.6rem;
     border-radius: 6px;
-    border: none;
     background-color: #d9d9d9;
     font-weight: 500;
     font-size: 0.85rem;
+    text-align: center;
     cursor: pointer;
     transition: background 0.2s ease;
+    border: 1px solid transparent;
 }
 
-.gender-btn:hover {
+.gender-options label:hover {
     background-color: #bfbfbf;
+}
+
+.gender-options input[type="radio"] {
+    display: none;
+}
+
+.gender-options input[type="radio"]:checked + label {
+    background-color: #a5aaff;
+    color: white;
+    border: 1px solid #888;
 }
 
 .submit-btn {

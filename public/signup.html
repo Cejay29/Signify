@@ -18,48 +18,44 @@
         <img src="bg/shape-center-bot.png" class="bg-shape cenbot" alt="">
 
         <div class="form-container">
-            <button class="close-btn" onclick="window.location.href='homepage.html'">✕</button>
+            <button class="close-btn" onclick="window.location.href='landing.html'">✕</button>
             <h1>Sign up</h1>
             <div class="card">
                 <h2>Create a new account</h2>
                 <p>Start your journey to sign fluency now!</p>
-                <form>
+                <form action="/signup" method="POST">
                     <label for="first-name">First Name</label>
                     <div class="name-row">
-                        <input type="text" id="first-name" placeholder="First name" />
+                        <input type="text" id="first-name" name="username" placeholder="First name" required />
                         <input type="text" id="last-name" placeholder="Last name" />
                     </div>
-                    <label for="last-name" class="visually-hidden">Last Name</label>
 
-                    <label>Birthday</label>
-                    <div class="row">
-                        <select name="month" id="month">
-                            <option>Month</option>
-                        </select>
-                        <select name="day" id="day">
-                            <option>Day</option>
-                        </select>
-                        <select name="year" id="year">
-                            <option>Year</option>
-                        </select>
+                    <label for="birthday">Birthday</label>
+                    <input type="date" id="birthday" name="birthday" required />
+
+                    <label class="gender-label" for="gender-label">Gender</label>
+                    <div class="gender-options">
+                        <input type="radio" name="gender" value="Female" id="female" required />
+                        <label for="female">Female</label>
+
+                        <input type="radio" name="gender" value="Male" id="male" />
+                        <label for="male">Male</label>
+
+                        <input type="radio" name="gender" value="Other" id="other" />
+                        <label for="other">Other</label>
                     </div>
 
-                    <label>Gender</label>
-                    <div class="row">
-                        <button type="button" class="gender-btn">Female</button>
-                        <button type="button" class="gender-btn">Male</button>
-                        <button type="button" class="gender-btn">Other</button>
-                    </div>
+
 
                     <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Email" />
+                    <input type="email" id="email" name="email" placeholder="Email" required />
 
                     <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Password" />
+                    <input type="password" id="password" name="password" placeholder="Password" required />
 
-                    <button class="submit-btn">Sign Up</button>
+                    <button type="submit" class="submit-btn">Sign Up</button>
                     <a href="login.html" class="login-text">Already have an account?</a>
-                </form> 
+                </form>
             </div>
         </div>
     </div>
