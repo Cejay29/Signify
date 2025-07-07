@@ -5,128 +5,158 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="menu.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <title>Learn</title>
 </head>
 
-<body>
-  <div class="menu">
-    <h2 class="logo">Signify</h2>
-    <button class="menu-btn active">
-      <img src="learn.png" class="learn">LEARN
+<body class="flex h-screen bg-[#1C1B2E] font-inter">
+  <div class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-4">
+    <h2 class="text-4xl font-bold text-[#FFC400] mb-5 text-center">Signify</h2>
+    <button
+      class="flex items-center gap-3 text-white text-base font-semibold p-3 rounded-lg border border-[#C5CAFF] uppercase">
+      <img src="learn.png" class="w-[50px] h-[50px] object-contain">LEARN
     </button>
-    <button class="menu-btn" onclick="window.location.href='alphabet.html'">
-      <img src="letter.png" class="letter">ALPHABET & MORE
+    <button class="flex items-center gap-3 text-white text-base font-semibold p-3 rounded-lg hover:bg-white/5"
+      onclick="window.location.href='alphabet.html'">
+      <img src="letter.png" class="w-[50px] h-[50px] object-contain">ALPHABET & MORE
     </button>
-    <button class="menu-btn">
-      <img src="shop.png" class="shop">SHOP
+    <button class="flex items-center gap-3 text-white text-base font-semibold p-3 rounded-lg hover:bg-white/5">
+      <img src="shop.png" class="w-[50px] h-[50px] object-contain">SHOP
     </button>
-    <button class="menu-btn">
-      <img src="profile.png" class="profile">PROFILE</button>
+    <button class="flex items-center gap-3 text-white text-base font-semibold p-3 rounded-lg hover:bg-white/5">
+      <img src="profile.png" class="w-[50px] h-[50px] object-contain">PROFILE</button>
 
-    <div class="menu-dropdown">
-      <button class="menu-btn">
-        <img src="more.png" class="more">MORE
+    <div class="relative">
+      <button class="flex items-center gap-3 text-white text-base font-semibold p-3 rounded-lg hover:bg-white/5">
+        <img src="more.png" class="w-[50px] h-[50px] object-contain">MORE
       </button>
-      <div class="dropdown-content">
-        <button class="logout-btn">LOG OUT</button>
+      <div
+        class="absolute left-20 top-full bg-[#1C1B2E] border border-[#C5CAFF] rounded-lg p-2 shadow-lg hidden group-hover:block">
+        <button class="w-full text-left text-[#C5CAFF] font-semibold p-2 rounded hover:bg-white/10">LOG OUT</button>
       </div>
     </div>
   </div>
 
-  <div class="main-content">
-    <div class="top-stats-bar">
-      <div class="stat">
-        <img src="flag.png" alt="US Flag" />
+  <div class="flex-1 bg-[#14142b] p-10 relative flex flex-col items-center">
+    <div class="absolute top-20 right-32 flex gap-6 text-white text-xl font-bold z-10">
+      <div class="flex items-center gap-2">
+        <img src="flag.png" class="w-9 h-9">
       </div>
-      <div class="stat">
-        <img src="fire.png" alt="Streak" />
-        <span>1</span>
+      <div class="flex items-center gap-2">
+        <img src="fire.png" class="w-9 h-9"> <span>1</span>
       </div>
-      <div class="stat">
-        <img src="gem.png" alt="Gems" />
-        <span>200</span>
+      <div class="flex items-center gap-2">
+        <img src="gem.png" class="w-9 h-9"> <span>200</span>
       </div>
-      <div class="stat">
-        <img src="heart.png" alt="Hearts" />
-        <span>5</span>
+      <div class="flex items-center gap-2">
+        <img src="heart.png" class="w-9 h-9"> <span>5</span>
       </div>
     </div>
 
-    <div class="section-wrapper">
-      <div class="section1">
-        <p class="section-label">SECTION 1, UNIT 1</p>
-        <h3 class="section-title">Order food</h3>
-      </div>
-
-      <div class="start-container">
-        <div class="start-label" id="start-label">START</div>
-        <div class="progress-circle-wrapper">
-          <svg class="progress-ring" width="120" height="120">
-            <circle class="progress-ring-bg" cx="60" cy="60" r="55" />
-            <circle class="progress-ring-bar" cx="60" cy="60" r="55" />
-          </svg>
-          <button class="level level1" id="level1-btn">
-            <img src="star.png" class="star" />
-          </button>
-        </div>
-        <div class="level-popup hidden" id="level1-popup">
-          <div class="popup-arrow"></div>
-          <div class="popup-content">
-            <p class="popup-title">Order food</p>
-            <p class="popup-subtitle">Lesson 1 of 3</p>
-            <button class="popup-btn">START + 10XP • + 20 GEMS</button>
-          </div>
-        </div>
-      </div>
-
-      <button class="level level2">
-        <img src="star.png" class="star" />
-      </button>
-      <button class="level level3">
-        <img src="star.png" class="star" />
-      </button>
-      <button class="level level4">
-        <img src="star.png" class="star" />
-      </button>
-      <button class="level level5">
-        <img src="star.png" class="star" />
-      </button>
-
-      <div class="coming-soon-wrapper">
-        <div class="coming-soon">
-          <span class="line"></span>
-          <span class="text">Coming Soon</span>
-          <span class="line"></span>
-        </div>
-      </div>
+    <div class="flex flex-col gap-20 items-center mt-20" id="level-container">
+      <!-- Dynamic levels injected here -->
     </div>
   </div>
 
   <script>
-    const level1 = document.getElementById("level1-btn");
-    const popup = document.getElementById("level1-popup");
-    const startLabel = document.getElementById("start-label");
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    level1.addEventListener("click", (e) => {
-      e.stopPropagation();
+    async function loadLevels() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return console.error('❌ No user found.');
 
-      if (popup.classList.contains("hidden")) {
-        popup.classList.remove("hidden");
-        startLabel.classList.add("hidden");
-      } else {
-        popup.classList.add("hidden");
-        startLabel.classList.remove("hidden");
-      }
-    });
+      const userId = user.id;
+      const { data: levels } = await supabase.from('levels').select('*').order('order');
+      const { data: lessons } = await supabase.from('lessons').select('*');
+      const { data: progress } = await supabase
+        .from('user_progress')
+        .select('lesson_id')
+        .eq('user_id', userId)
+        .eq('is_completed', true);
 
-    document.addEventListener("click", (e) => {
-      if (!popup.contains(e.target) && !level1.contains(e.target)) {
-        popup.classList.add("hidden");
-        startLabel.classList.remove("hidden");
-      }
-    });
+      const completedLessonIds = new Set(progress.map(p => p.lesson_id));
+      const container = document.getElementById('level-container');
+      container.innerHTML = '';
+
+      levels.forEach((level, i) => {
+        const lessonsForLevel = lessons.filter(l => l.level_id === level.id);
+        const completed = lessonsForLevel.filter(l => completedLessonIds.has(l.id)).length;
+        const total = lessonsForLevel.length;
+        const progressRatio = total ? completed / total : 0;
+        const dashArray = 250;
+        const dashOffset = dashArray * (1 - progressRatio);
+
+        const isUnlocked = i === 0 || levels.slice(0, i).every(prevLevel => {
+          const prevLessons = lessons.filter(l => l.level_id === prevLevel.id);
+          return prevLessons.every(l => completedLessonIds.has(l.id));
+        });
+
+        const isCurrent = isUnlocked && completed < total;
+        const sideClass = i % 2 === 0 ? 'self-start ml-10' : 'self-end mr-10';
+
+        const levelHTML = `
+        <div class="relative flex flex-col items-center ${sideClass}">
+          ${isCurrent ? `<div class="absolute -top-16 left-1/2 transform -translate-x-1/2 text-white text-sm font-bold bg-black px-4 py-2 rounded-md border border-white shadow z-10">START</div>` : ''}
+
+          <div class="relative w-[100px] h-[100px] flex items-center justify-center">
+            <svg class="absolute top-0 left-0 transform -rotate-90" width="100" height="100">
+              <circle class="fill-none stroke-[#2e2e4b]" cx="50" cy="50" r="45" stroke-width="8" />
+              <circle class="fill-none ${progressRatio === 1 ? 'stroke-green-400' : 'stroke-[#C5CAFF]'}"
+                cx="50" cy="50" r="45" stroke-width="8"
+                stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset.toFixed(1)}" />
+            </svg>
+            <button
+              class="w-[70px] h-[70px] rounded-full flex items-center justify-center 
+              ${isUnlocked ? 'bg-[#A9A9FF]' : 'bg-[#4b4b5e] opacity-50 cursor-not-allowed'} 
+              shadow-lg z-10"
+              ${isUnlocked ? `data-level-id="${level.id}"` : 'disabled'}
+            >
+              <img src="star.png" class="w-[40px] h-[40px] ${isUnlocked ? '' : 'grayscale'} pointer-events-none">
+            </button>
+          </div>
+
+          <div class="absolute -top-36 bg-[#C5CAFF] p-4 rounded-xl text-[#1C1B2E] shadow-lg w-[250px] text-left hidden z-20" id="popup-${level.id}">
+            <div class="text-xs font-semibold uppercase">Section ${level.section}, Unit ${level.order}</div>
+            <div class="text-lg font-bold mt-1">${level.title}</div>
+            <div class="text-sm mt-1">Progress: ${completed}/${total} lessons</div>
+            <button class="bg-[#1C1B2E] text-white px-3 py-2 mt-3 rounded text-sm font-semibold"
+              onclick="window.location.href='lesson.html?level_id=${level.id}'">
+              START +${level.xp_reward} XP • ${level.gem_reward} GEMS
+            </button>
+          </div>
+        </div>
+      `;
+
+        container.insertAdjacentHTML('beforeend', levelHTML);
+      });
+
+      document.querySelectorAll('button[data-level-id]').forEach(btn => {
+        const id = btn.getAttribute('data-level-id');
+        const popup = document.getElementById(`popup-${id}`);
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.querySelectorAll('[id^="popup-"]').forEach(p => p.classList.add('hidden'));
+          popup.classList.toggle('hidden');
+        });
+      });
+
+      document.addEventListener('click', () => {
+        document.querySelectorAll('[id^="popup-"]').forEach(p => p.classList.add('hidden'));
+      });
+
+      container.insertAdjacentHTML('beforeend', `
+      <div class="mt-20 text-center text-white/40 text-sm tracking-wide">
+        <hr class="w-1/2 mx-auto mb-2 border-white/20">
+        Coming Soon
+      </div>
+    `);
+    }
+
+    loadLevels();
   </script>
+
 </body>
 
 </html>
