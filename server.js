@@ -8,13 +8,22 @@ const supabase = require('./supabaseClient');
 const app = express();
 const PORT = 5500;
 
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    }
+});
+
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🔐 Send OTP
-// 🔐 Send OTP
+// Send OTP
 app.post('/send-otp', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).send('Email is required');
@@ -34,34 +43,73 @@ app.post('/send-otp', async (req, res) => {
         return res.status(500).send(error.message || 'Failed to store OTP');
     }
 
-    console.log(`✅ OTP ${otp} generated for: ${email}`);
+    // Send Email using nodemailer
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your Signify OTP Code',
+        text: `Your OTP code is: ${otp}. It will expire in 5 minutes.`,
+    };
 
-    // ✅ Send a success response back to the client
-    res.status(200).send('OTP successfully stored and sent (check console/email)');
+    transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+            console.error('❌ Email Send Error:', err);
+            return res.status(500).send('Failed to send OTP email');
+        }
+
+        console.log('✅ Email sent:', info.response);
+        res.status(200).send('OTP sent successfully!');
+    });
 });
 
-// ✅ Verify OTP
+// Verify-OTP
 app.post('/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
+    console.log('📥 OTP Verify Request:', { email, otp });
+
+    if (!email || !otp) {
+        console.log('❌ Missing email or otp');
+        return res.status(400).send('Missing email or OTP');
+    }
+
     const { data, error } = await supabase
         .from('otps')
         .select('code, expires_at')
         .eq('email', email)
-        .single();
+        .order('expires_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    if (error || !data) return res.status(400).send('OTP not found');
+    if (error) {
+        console.log('❌ Supabase Error:', error.message);
+        return res.status(500).send('Supabase error');
+    }
+
+    if (!data) {
+        console.log('❌ No OTP found for:', email);
+        return res.status(400).send('OTP not found');
+    }
+
+    console.log('✅ OTP record found:', data);
 
     const now = new Date();
     const expiration = new Date(data.expires_at);
-    if (now > expiration) return res.status(401).send('OTP expired');
+    if (now > expiration) {
+        console.log('❌ OTP expired');
+        return res.status(401).send('OTP expired');
+    }
 
-    if (otp !== data.code) return res.status(401).send('Invalid OTP');
+    if (otp !== data.code) {
+        console.log('❌ OTP mismatch:', otp, '!==', data.code);
+        return res.status(401).send('Invalid OTP');
+    }
 
     await supabase.from('otps').delete().eq('email', email);
+    console.log('✅ OTP verified and deleted');
     res.send('OTP verified');
 });
 
-// 📝 Signup
+// Signup
 app.post('/signup', async (req, res) => {
     const { username, email, password, birthday, gender } = req.body;
 
@@ -83,7 +131,7 @@ app.post('/signup', async (req, res) => {
     res.send('Signup successful');
 });
 
-// 🔐 Login (if you’re using it)
+// Login (if you’re using it)
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -105,10 +153,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
-// 🌐 Serve static files from /public
+// Serve static files from /public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🟢 Start the server
+// Start the server
 app.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
