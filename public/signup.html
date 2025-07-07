@@ -5,60 +5,151 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign Up</title>
-    <link rel="stylesheet" href="signup.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 
-<body>
-    <div class="background">
-        <img src="bg/shape-bottom-kanan.png" class="bg-shape bottom-right" alt="">
-        <img src="bg/shape-bottom-left.png" class="bg-shape bottom-left">
-        <img src="bg/shape-top-left.png" class="bg-shape top-left" alt="">
-        <img src="bg/shape-top-right.png" class="bg-shape top-right" alt="">
-        <img src="bg/shape-center.png" class="bg-shape center" alt="">
-        <img src="bg/shape-center-bot.png" class="bg-shape cenbot" alt="">
+<body class="bg-[#0c0731] min-h-screen flex items-center justify-center relative font-[Inter]">
+    <!-- Background Shapes -->
+    <img src="../Sinify/bg/shape-bottom-kanan.png"
+        class="absolute bottom-0 right-0 w-[350px] opacity-20 pointer-events-none" alt="">
+    <img src="../Signify/bg/shape-bottom-left.png"
+        class="absolute bottom-0 left-0 w-[400px] opacity-80 pointer-events-none" alt="">
+    <img src="../Signify/bg/shape-top-left.png" class="absolute top-0 left-0 w-[350px] pointer-events-none" alt="">
+    <img src="../Signify/bg/shape-top-right.png" class="absolute top-0 right-0 w-[350px] pointer-events-none" alt="">
+    <img src="../Signify/bg/shape-center.png"
+        class="absolute top-[210px] left-[35%] w-[500px] rotate-[-10deg] pointer-events-none" alt="">
+    <img src="../Signify/bg/shape-center-bot.png"
+        class="absolute -bottom-[130px] left-[35%] w-[500px] pointer-events-none" alt="">
 
-        <div class="form-container">
-            <button class="close-btn" onclick="window.location.href='landing.html'">✕</button>
-            <h1>Sign up</h1>
-            <div class="card">
-                <h2>Create a new account</h2>
-                <p>Start your journey to sign fluency now!</p>
-                <form action="/signup" method="POST">
-                    <label for="first-name">First Name</label>
-                    <div class="name-row">
-                        <input type="text" id="first-name" name="username" placeholder="First name" required />
-                        <input type="text" id="last-name" placeholder="Last name" />
+    <!-- Close Button -->
+    <button onclick="window.location.href='landing.html'" class="fixed top-5 left-5 text-white text-2xl z-50">✕</button>
+
+    <!-- Sign Up Form -->
+    <div class="z-10 text-white w-full px-4">
+        <h1 class="text-3xl font-bold mb-6 text-center">Sign up</h1>
+        <div class="bg-gray-100 text-black rounded-xl p-8 max-w-md w-full mx-auto shadow-xl">
+            <h2 class="text-xl font-semibold text-center">Create a new account</h2>
+            <p class="text-sm text-gray-600 mb-4 text-center">Start your journey to sign fluency now!</p>
+            <form id="signup-form" class="flex flex-col gap-3">
+                <div>
+                    <label class="text-sm font-medium block mb-1 text-left">First Name</label>
+                    <div class="flex flex-row gap-2">
+                        <input type="text" id="first-name" placeholder="First name" required
+                            class="w-1/2 p-2 rounded border" />
+                        <input type="text" id="last-name" placeholder="Last name" class="w-1/2 p-2 rounded border" />
                     </div>
+                </div>
 
-                    <label for="birthday">Birthday</label>
-                    <input type="date" id="birthday" name="birthday" required />
+                <div>
+                    <label class="text-sm font-medium block mt-2 mb-1 text-left">Birthday</label>
+                    <input type="date" id="birthday" required class="p-2 rounded border w-full" />
+                </div>
 
-                    <label class="gender-label" for="gender-label">Gender</label>
-                    <div class="gender-options">
-                        <input type="radio" name="gender" value="Female" id="female" required />
-                        <label for="female">Female</label>
-
-                        <input type="radio" name="gender" value="Male" id="male" />
-                        <label for="male">Male</label>
-
-                        <input type="radio" name="gender" value="Other" id="other" />
-                        <label for="other">Other</label>
+                <div>
+                    <label class="text-sm font-medium block mt-2 mb-1 text-left">Gender</label>
+                    <div class="flex gap-2 justify-between">
+                        <div class="flex-1">
+                            <input type="radio" id="female" name="gender" value="Female" class="hidden peer" required />
+                            <label for="female"
+                                class="block p-2 rounded border text-center cursor-pointer transition-colors duration-200 peer-checked:bg-indigo-300 peer-checked:text-white hover:bg-indigo-100">Female</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" id="male" name="gender" value="Male" class="hidden peer" />
+                            <label for="male"
+                                class="block p-2 rounded border text-center cursor-pointer transition-colors duration-200 peer-checked:bg-indigo-300 peer-checked:text-white hover:bg-indigo-100">Male</label>
+                        </div>
+                        <div class="flex-1">
+                            <input type="radio" id="other" name="gender" value="Other" class="hidden peer" />
+                            <label for="other"
+                                class="block p-2 rounded border text-center cursor-pointer transition-colors duration-200 peer-checked:bg-indigo-300 peer-checked:text-white hover:bg-indigo-100">Other</label>
+                        </div>
                     </div>
+                </div>
 
+                <div>
+                    <label class="text-sm font-medium block mt-2 mb-1 text-left">Email</label>
+                    <input type="email" id="email" placeholder="Email" required class="p-2 rounded border w-full" />
+                </div>
 
+                <div>
+                    <label class="text-sm font-medium block mt-2 mb-1 text-left">Password</label>
+                    <input type="password" id="password" placeholder="Password" required
+                        class="p-2 rounded border w-full" />
+                </div>
 
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Email" required />
-
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Password" required />
-
-                    <button type="submit" class="submit-btn">Sign Up</button>
-                    <a href="login.html" class="login-text">Already have an account?</a>
-                </form>
-            </div>
+                <button type="submit"
+                    class="bg-gradient-to-r from-indigo-200 to-indigo-300 mt-4 py-2 rounded font-semibold shadow hover:from-indigo-300 hover:to-indigo-400 transition-colors duration-200">Sign
+                    Up</button>
+                <a href="login.html" class="text-sm text-blue-500 mt-2 block text-center">Already have an account?</a>
+            </form>
         </div>
     </div>
+
+    <!-- Logic -->
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+        const supabase = createClient(
+            'https://lxetbblytlvihitapazv.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4ZXRiYmx5dGx2aWhpdGFwYXp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MzQ1OTgsImV4cCI6MjA2NzMxMDU5OH0.CqDTiPYDmaLouY5EdQHXXTTqZ233RPaa8G8jFFKSZ4g'
+        );
+
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const signupBtn = document.querySelector('button[type="submit"]');
+            signupBtn.disabled = true;
+            signupBtn.innerText = "Signing up...";
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const username = document.getElementById('first-name').value.trim();
+            const lastName = document.getElementById('last-name').value.trim();
+            const birthday = document.getElementById('birthday').value;
+            const gender = document.querySelector('input[name="gender"]:checked')?.value;
+
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        username,
+                        last_name: lastName,
+                        birthday,
+                        gender
+                    },
+                    emailRedirectTo: 'https://zany-winner-5g9p77xxgr7727r4r-5500.app.github.dev/login.html'
+                }
+            });
+
+            if (error) {
+                alert("Signup error: " + error.message);
+                signupBtn.disabled = false;
+                signupBtn.innerText = "Sign Up";
+                return;
+            }
+
+            if (data.user) {
+                const { error: insertError } = await supabase.from('users').insert({
+                    id: data.user.id,
+                    username,
+                    email: data.user.email,
+                    xp: 0,
+                    gems: 0,
+                    birthday,
+                    gender
+                });
+
+                if (insertError) {
+                    console.error("Insert user error:", insertError.message);
+                }
+            }
+
+            alert("Signup successful! Check your email to confirm.");
+        });
+    </script>
+
 </body>
 
 </html>

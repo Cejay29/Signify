@@ -5,34 +5,136 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login | Signify</title>
-    <link rel="stylesheet" href="login.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        #toast {
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        #toast:not(.hidden) {
+            opacity: 1;
+        }
+    </style>
+
 </head>
 
-<body>
-    <img src="bg/shape-bottom-kanan.png" class="bg-shape bottom-right" alt="">
-    <img src="bg/shape-bottom-left.png" class="bg-shape bottom-left">
-    <img src="bg/shape-top-left.png" class="bg-shape top-left" alt="">
-    <img src="bg/shape-top-right.png" class="bg-shape top-right" alt="">
-    <img src="bg/shape-center.png" class="bg-shape center" alt="">
-    <img src="bg/shape-center-bot.png" class="bg-shape cenbot" alt="">
-    <div class="container">
-        <button class="close-btn" onclick="window.location.href='landing.html'">✕</button>
-        <div class="login-box">
-            <h2 class="login-title">Log in</h2>
-            <form action="/login" method="POST">
-                <input type="text" name="email" placeholder="Email or username" class="input-field" required />
-                <div class="password-container">
-                    <input type="password" name="password" placeholder="Password" class="input-field" required />
-                </div>
-                <button type="submit" class="login-btn">LOG IN</button>
-                <a href="#" class="forgot">Forgot Password?</a>
-                <hr />
-                <button type="button" onclick="window.location.href='signup.html'" class="create-btn">Create an
-                    Account</button>
+<body class="bg-[#0E0A3A] min-h-screen flex items-center justify-center relative font-[Inter]">
+    <!-- Background Shapes -->
+    <img src="bg/shape-bottom-kanan.png" class="absolute bottom-0 right-0 w-[350px] opacity-20 pointer-events-none"
+        alt="">
+    <img src="bg/shape-bottom-left.png" class="absolute bottom-0 left-0 w-[400px] opacity-80 pointer-events-none">
+    <img src="bg/shape-top-left.png" class="absolute top-0 left-0 w-[350px] pointer-events-none" alt="">
+    <img src="bg/shape-top-right.png" class="absolute top-0 right-0 w-[350px] pointer-events-none" alt="">
+    <img src="bg/shape-center.png" class="absolute top-[210px] left-[35%] w-[500px] rotate-[-10deg] pointer-events-none"
+        alt="">
+    <img src="bg/shape-center-bot.png"
+        class="absolute -bottom-[130px] left-[35%] w-[500px] opacity-100 pointer-events-none" alt="">
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed hidden z-50 transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 px-6 py-3 rounded-xl shadow-xl text-center text-white text-lg font-semibold">
+    </div>
+
+    <!-- Close Button -->
+    <button onclick="window.location.href='landing.html'" class="fixed top-5 left-5 text-white text-3xl z-50">✕</button>
+
+    <!-- Login Box -->
+    <div class="z-10 text-white w-full px-4">
+        <div class="bg-transparent p-10 max-w-lg w-full mx-auto flex flex-col items-center">
+            <h2 class="text-4xl font-bold mb-8">Log in</h2>
+            <form id="login-form" class="w-full flex flex-col gap-4">
+                <input type="email" id="email" placeholder="Email"
+                    class="w-full p-4 rounded-xl text-black border border-gray-300 outline-none text-lg" required />
+                <input type="password" id="password" placeholder="Password"
+                    class="w-full p-4 rounded-xl text-black border border-gray-300 outline-none text-lg" required />
+                <button type="submit" id="login-button"
+                    class="w-full bg-gradient-to-r from-sky-400 to-sky-500 text-black font-bold py-3 rounded-xl shadow-[0_4px_0_#1c6fa5] hover:from-sky-300 hover:to-sky-400 transition-colors">LOG
+                    IN</button>
+                <a href="#" onclick="document.getElementById('forgotModal').classList.remove('hidden')"
+                    class="text-sm text-gray-300 text-center hover:underline">Forgot Password?</a>
+                <hr class="border-t border-gray-500 my-2">
+                <button type="button" onclick="window.location.href='signup.html'"
+                    class="w-full bg-indigo-200 text-[#0a0035] font-bold py-3 rounded-xl shadow-[0_4px_0_rgba(138,138,255,0.6)] border border-indigo-400 hover:bg-indigo-300 transition-colors">Create
+                    an Account</button>
             </form>
         </div>
     </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-[90%] max-w-md text-black text-center shadow-xl">
+            <h3 class="text-2xl font-semibold mb-4">Reset Password</h3>
+            <p class="mb-4 text-sm text-gray-700">Enter your email and we’ll send you a reset link.</p>
+            <input type="email" id="forgot-email" placeholder="Your email"
+                class="w-full p-3 mb-4 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('forgotModal').classList.add('hidden')"
+                    class="text-sm px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 transition-colors">Cancel</button>
+                <button id="reset-btn"
+                    class="text-sm px-4 py-2 rounded bg-indigo-500 text-white hover:bg-indigo-600 transition-colors">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function showToast(message, bg = 'bg-white', text = 'text-black') {
+            const toast = document.getElementById('toast');
+            toast.className = `fixed z-50 transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 px-6 py-3 rounded-xl shadow-xl text-center text-lg font-semibold ${bg} ${text}`;
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("login-button");
+            btn.disabled = true;
+            btn.innerText = "Logging in...";
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                showToast("Login failed: " + error.message, 'bg-red-500', 'text-white');
+                btn.disabled = false;
+                btn.innerText = "LOG IN";
+            } else {
+                showToast("Login successful! Redirecting...", 'bg-green-500', 'text-white');
+                setTimeout(() => {
+                    window.location.href = "homepage.html";
+                }, 1000);
+            }
+        });
+
+        document.getElementById("reset-btn").addEventListener("click", async () => {
+            const email = document.getElementById("forgot-email").value;
+            if (!email) return showToast("Enter your email.", 'bg-yellow-300', 'text-black');
+
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${location.origin}/update-password.html`
+            });
+
+            if (error) {
+                showToast("Reset failed: " + error.message, 'bg-red-500', 'text-white');
+            } else {
+                showToast("Reset email sent!", 'bg-indigo-500', 'text-white');
+                document.getElementById("forgotModal").classList.add("hidden");
+            }
+        });
+    </script>
 </body>
 
 </html>
