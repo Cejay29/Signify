@@ -69,7 +69,7 @@
 
       const userId = user.id;
       const { data: levels } = await supabase.from('levels').select('*').order('order');
-      const { data: lessons } = await supabase.from('lessons').select('*');
+      const { data: lessons } = await supabase.from('lesson').select('*');
       const { data: progress } = await supabase
         .from('user_progress')
         .select('lesson_id')
