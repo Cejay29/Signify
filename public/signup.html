@@ -6,16 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign Up</title>
     <link rel="stylesheet" href="signup.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 
 <body>
     <div class="background">
-        <img src="bg/shape-bottom-kanan.png" class="bg-shape bottom-right" alt="">
-        <img src="bg/shape-bottom-left.png" class="bg-shape bottom-left">
-        <img src="bg/shape-top-left.png" class="bg-shape top-left" alt="">
-        <img src="bg/shape-top-right.png" class="bg-shape top-right" alt="">
-        <img src="bg/shape-center.png" class="bg-shape center" alt="">
-        <img src="bg/shape-center-bot.png" class="bg-shape cenbot" alt="">
+        <img src="../Sinify/bg/shape-bottom-kanan.png" class="bg-shape bottom-right" alt="">
+        <img src="../Signify/bg/shape-bottom-left.png" class="bg-shape bottom-left">
+        <img src="../Signify/bg/shape-top-left.png" class="bg-shape top-left" alt="">
+        <img src="../Signify/bg/shape-top-right.png" class="bg-shape top-right" alt="">
+        <img src="../Signify/bg/shape-center.png" class="bg-shape center" alt="">
+        <img src="../Signify/bg/shape-center-bot.png" class="bg-shape cenbot" alt="">
 
         <div class="form-container">
             <button class="close-btn" onclick="window.location.href='landing.html'">✕</button>
@@ -23,7 +24,7 @@
             <div class="card">
                 <h2>Create a new account</h2>
                 <p>Start your journey to sign fluency now!</p>
-                <form action="/signup" method="POST">
+                <form id="signup-form" action="javascript:void(0)">
                     <label for="first-name">First Name</label>
                     <div class="name-row">
                         <input type="text" id="first-name" name="username" placeholder="First name" required />
@@ -37,18 +38,24 @@
                     <div class="gender-options">
                         <input type="radio" name="gender" value="Female" id="female" required />
                         <label for="female">Female</label>
-
                         <input type="radio" name="gender" value="Male" id="male" />
                         <label for="male">Male</label>
-
                         <input type="radio" name="gender" value="Other" id="other" />
                         <label for="other">Other</label>
                     </div>
 
-
-
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" placeholder="Email" required />
+
+                    <div class="otp-section">
+                        <label for="otp">Enter OTP</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="otp" name="otp" maxlength="6" placeholder="123456" required
+                                style="flex: 1;" />
+                            <button type="button" id="send-otp-btn" class="submit-btn" style="padding: 5px 10px;">Send
+                                OTP</button>
+                        </div>
+                    </div>
 
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" placeholder="Password" required />
@@ -59,6 +66,78 @@
             </div>
         </div>
     </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+        const supabaseUrl = 'https://lxetbblytlvihitapazv.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOi...<your_anon_key>';
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+        const BASE_URL = window.location.origin;
+        let signupData = {};
+
+        // 🔐 Send OTP handler
+        document.getElementById('send-otp-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            if (!email) return alert('Please enter your email first.');
+
+            const response = await fetch(`${BASE_URL}/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: document.getElementById('email').value.trim() })
+            });
+
+            if (response.ok) {
+                alert('OTP sent!.');
+            } else {
+                alert(await response.text());
+            }
+        });
+
+        // ✅ Submit Signup form
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            signupData = {
+                username: document.getElementById('first-name').value,
+                last_name: document.getElementById('last-name').value,
+                birthday: document.getElementById('birthday').value,
+                gender: document.querySelector('input[name="gender"]:checked')?.value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+            };
+
+            const email = document.getElementById('email').value.trim();
+            const otp = document.getElementById('otp').value.trim();
+            console.log('Verifying OTP:', { email, otp }); // ✅ Add this
+
+            if (!otp || otp.length !== 6) return alert('Please enter a valid 6-digit OTP.');
+
+            // Verify OTP
+            const verify = await fetch(`${BASE_URL}/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: signupData.email, otp })
+            });
+
+            if (!verify.ok) return alert(await verify.text());
+
+            // Proceed to signup
+            const signup = await fetch(`${BASE_URL}/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(signupData)
+            });
+
+            if (signup.ok) {
+                alert('Signup successful!');
+                window.location.href = '/login.html';
+            } else {
+                alert(await signup.text());
+            }
+        });
+    </script>
 </body>
 
 </html>
