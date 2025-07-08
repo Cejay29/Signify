@@ -10,6 +10,11 @@
 </head>
 
 <body class="bg-[#0c0731] min-h-screen flex items-center justify-center relative font-[Inter]">
+
+    <div id="toast"
+        class="fixed z-50 top-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-xl text-center text-white text-base font-semibold bg-red-500 opacity-0 transition-opacity duration-500 pointer-events-none">
+    </div>
+
     <!-- Background Shapes -->
     <img src="../Sinify/bg/shape-bottom-kanan.png"
         class="absolute bottom-0 right-0 w-[350px] opacity-20 pointer-events-none" alt="">
@@ -95,6 +100,24 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4ZXRiYmx5dGx2aWhpdGFwYXp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MzQ1OTgsImV4cCI6MjA2NzMxMDU5OH0.CqDTiPYDmaLouY5EdQHXXTTqZ233RPaa8G8jFFKSZ4g'
         );
 
+        function showToast(message, bg = 'bg-red-500', text = 'text-white') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `fixed z-50 top-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-xl text-center text-base font-semibold pointer-events-none transition-opacity duration-500 opacity-0 ${bg} ${text}`;
+
+            // Trigger fade-in
+            requestAnimationFrame(() => {
+                toast.classList.remove('opacity-0');
+                toast.classList.add('opacity-100');
+            });
+
+            // Auto-hide after 2.5 seconds
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -124,7 +147,7 @@
             });
 
             if (error) {
-                alert("Signup error: " + error.message);
+                showToast("Signup error: " + error.message);
                 signupBtn.disabled = false;
                 signupBtn.innerText = "Sign Up";
                 return;
@@ -146,7 +169,7 @@
                 }
             }
 
-            alert("Signup successful! Check your email to confirm.");
+            showToast("Signup successful! Check your email to confirm.", 'bg-green-500', 'text-white');
         });
     </script>
 

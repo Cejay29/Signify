@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gesture Data Collector</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white font-sans">
+    <div class="max-w-2xl mx-auto p-4">
+        <h1 class="text-xl font-bold mb-4">🖐️ Gesture Data Collector</h1>
+        <video id="webcam" class="rounded mb-4 border border-gray-600" width="640" height="480" autoplay
+            playsinline></video>
+
+        <div class="mb-2">
+            <label for="labelInput" class="text-sm text-gray-400">Label this gesture:</label>
+            <input id="labelInput" type="text" class="w-full px-2 py-1 text-black rounded" placeholder="e.g., WATER" />
+        </div>
+
+        <button id="saveBtn" class="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded">Save Sample</button>
+        <button id="downloadBtn" class="ml-2 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">Download JSON</button>
+
+        <p id="status" class="mt-4 text-green-300 text-sm"></p>
+    </div>
+
+    <script>
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let webcamEl = document.getElementById("webcam");
+        let labelInput = document.getElementById("labelInput");
+        let saveBtn = document.getElementById("saveBtn");
+        let downloadBtn = document.getElementById("downloadBtn");
+        let statusEl = document.getElementById("status");
+
+        let gestureSamples = [];
+        let currentLandmarks = null;
+
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
+        });
+
+        hands.onResults((results) => {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                currentLandmarks = landmarks.map(pt => ({ x: pt.x, y: pt.y, z: pt.z }));
+            }
+        });
+
+        const camera = new Camera(webcamEl, {
+            onFrame: async () => {
+                await hands.send({ image: webcamEl });
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+
+        saveBtn.onclick = async () => {
+            const label = labelInput.value.trim().toUpperCase();
+            if (!label || !currentLandmarks) {
+                statusEl.innerText = "⚠️ Please provide a label and ensure a hand is visible.";
+                return;
+            }
+
+            // Save to Supabase
+            const { error } = await supabase.from("gesture_sample").insert([
+                {
+                    gloss: label,
+                    landmarks: currentLandmarks
+                }
+            ]);
+
+            if (error) {
+                console.error("Supabase insert error:", error);
+                statusEl.innerText = "❌ Error saving to Supabase: " + error.message;
+            } else {
+                gestureSamples.push({ label, landmarks: currentLandmarks });
+                statusEl.innerText = `✅ Sample saved for "${label}" to Supabase. Total locally saved: ${gestureSamples.length}`;
+            }
+        };
+
+        downloadBtn.onclick = () => {
+            const blob = new Blob([JSON.stringify(gestureSamples, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "gesture_data.json";
+            link.click();
+        };
+    </script>
+</body>
+
+</html>
