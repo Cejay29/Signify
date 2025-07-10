@@ -71,26 +71,60 @@
 
         saveBtn.onclick = async () => {
             const label = labelInput.value.trim().toUpperCase();
-            if (!label || !currentLandmarks) {
-                statusEl.innerText = "⚠️ Please provide a label and ensure a hand is visible.";
+            if (!label) {
+                statusEl.innerText = "⚠️ Please provide a label.";
                 return;
             }
 
-            // Save to Supabase
-            const { error } = await supabase.from("gesture_sample").insert([
-                {
-                    gloss: label,
-                    landmarks: currentLandmarks
-                }
-            ]);
+            let countdown = 3;
+            statusEl.innerText = `⏳ Get ready... ${countdown}`;
 
-            if (error) {
-                console.error("Supabase insert error:", error);
-                statusEl.innerText = "❌ Error saving to Supabase: " + error.message;
-            } else {
-                gestureSamples.push({ label, landmarks: currentLandmarks });
-                statusEl.innerText = `✅ Sample saved for "${label}" to Supabase. Total locally saved: ${gestureSamples.length}`;
-            }
+            // Countdown before capture
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    statusEl.innerText = `⏳ Get ready... ${countdown}`;
+                } else {
+                    clearInterval(countdownInterval);
+                    startCapture(label);
+                }
+            }, 1000);
+        };
+
+        function startCapture(label) {
+            statusEl.innerText = `🎬 Capturing samples for "${label}"...`;
+
+            const duration = 6000; // 6 seconds
+            const interval = 200;  // every 200ms
+            const endTime = Date.now() + duration;
+
+            let captured = 0;
+
+            const captureInterval = setInterval(async () => {
+                if (Date.now() >= endTime) {
+                    clearInterval(captureInterval);
+                    statusEl.innerText = `✅ Done! Captured ${captured} samples for "${label}".`;
+                    return;
+                }
+
+                if (currentLandmarks) {
+                    const sample = {
+                        gloss: label,
+                        landmarks: currentLandmarks
+                    };
+
+                    const { error } = await supabase.from("gesture_sample").insert([sample]);
+
+                    if (!error) {
+                        gestureSamples.push(sample);
+                        captured++;
+                        statusEl.innerText = `📸 Capturing... ${captured}`;
+                    } else {
+                        console.error("Supabase insert error:", error);
+                        statusEl.innerText = "❌ Error saving sample.";
+                    }
+                }
+            }, interval);
         };
 
         downloadBtn.onclick = () => {
