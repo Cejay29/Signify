@@ -67,9 +67,6 @@
           class="hearts-value font-bold">0</span></div>
     </header>
 
-    <!-- Force Tailwind to preserve hover class -->
-    <div class="hidden hover:scale-105"></div>
-
     <section class="pt-40">
       <div id="banner-container" class="mb-10 flex justify-center"></div>
       <div id="level-container" class="flex flex-col items-center gap-10 px-6"></div>
@@ -96,61 +93,77 @@
       const container = document.getElementById('level-container');
       container.innerHTML = '';
 
-      const firstRow = document.createElement('div');
-      firstRow.className = 'flex flex-wrap justify-center gap-10 mb-10';
-      const secondRow = document.createElement('div');
-      secondRow.className = 'flex flex-wrap justify-center gap-10';
-
       levels.forEach((level, index) => {
-        const lessonsForLevel = lessons.filter(l => l.level_id?.toString() === level.id?.toString());
+        const lessonsForLevel = lessons.filter(l => l.level_id === level.id);
         const completed = lessonsForLevel.filter(l => completedLessonIds.has(l.id)).length;
         const total = lessonsForLevel.length;
         const progressRatio = total ? completed / total : 0;
 
         const isUnlocked = index === 0 || levels.slice(0, index).every(prev => {
-          const prevLessons = lessons.filter(l => l.level_id?.toString() === prev.id?.toString());
+          const prevLessons = lessons.filter(l => l.level_id === prev.id);
           return prevLessons.length > 0 && prevLessons.every(l => completedLessonIds.has(l.id));
         });
 
-        const card = document.createElement('div');
-        card.classList.add(
-          'relative', 'w-[220px]', 'p-5', 'rounded-2xl', 'shadow-lg',
-          'flex', 'flex-col', 'items-center', 'justify-between',
-          'text-center', 'border-2', 'border-[#C5CAFF]',
-          'transition-transform', 'duration-300',
-          'bg-gradient-to-b', 'animate-fade-in-up'
-        );
+        const levelCard = document.createElement('div');
+        levelCard.className = 'w-full max-w-3xl bg-[#2A2A3C] p-6 rounded-2xl shadow border border-[#C5CAFF] text-white animate-fade-in-up';
 
-        if (isUnlocked) {
-          card.classList.add('from-[#2A2A3C]', 'to-[#1C1B2E]', 'hover:scale-105');
-        } else {
-          card.classList.add('from-gray-700', 'to-gray-800', 'opacity-60');
-        }
-
-        card.innerHTML = `
-          <div class="text-[#C5CAFF] text-xs font-semibold uppercase mb-2 tracking-wider">Section ${level.section}, Unit ${level.order}</div>
-          <div class="text-white font-bold text-lg mb-3">${level.title}</div>
-          <div class="w-full h-2 bg-[#3a3a55] rounded-full overflow-hidden mb-3">
-            <div class="h-full bg-[#C5CAFF]" style="width: ${(progressRatio * 100).toFixed(0)}%"></div>
+        levelCard.innerHTML = `
+          <div class="mb-4">
+            <div class="text-[#C5CAFF] text-sm font-semibold uppercase mb-1 tracking-wide">Section ${level.section}, Unit ${level.order}</div>
+            <div class="text-xl font-bold">${level.title}</div>
+            <div class="w-full h-2 bg-[#3a3a55] rounded-full overflow-hidden mt-2 mb-1">
+              <div class="h-full bg-[#C5CAFF]" style="width: ${(progressRatio * 100).toFixed(0)}%"></div>
+            </div>
+            <div class="text-sm text-gray-300">Progress: ${completed}/${total}</div>
           </div>
-          <div class="text-sm text-white mb-3">Progress: ${completed}/${total}</div>
-          <button ${isUnlocked ? `onclick="window.location.href='lesson.html?level_id=${level.id}'"` : 'disabled'}
-            class="px-3 py-2 w-full rounded-md text-sm font-semibold ${isUnlocked ? 'bg-[#C5CAFF] text-[#1C1B2E] hover:bg-[#b0b9ff]' : 'bg-gray-500 cursor-not-allowed'}">
-            ${isUnlocked ? `START +${level.xp_reward} XP • ${level.gem_reward} GEMS` : 'Locked'}
-          </button>
+          <div class="flex flex-col gap-3 mt-4" id="lessons-${level.id}"></div>
         `;
 
-        if (index < 3) {
-          firstRow.appendChild(card);
-        } else {
-          secondRow.appendChild(card);
-        }
-      });
+        const lessonContainer = levelCard.querySelector(`#lessons-${level.id}`);
+        lessonsForLevel.forEach(lesson => {
+          const lessonCompleted = completedLessonIds.has(lesson.id);
+          const sortedLessons = [...lessonsForLevel].sort((a, b) => a.order - b.order);
+          const currentIndex = sortedLessons.findIndex(l => l.id === lesson.id);
 
-      container.appendChild(firstRow);
-      if (secondRow.children.length > 0) {
-        container.appendChild(secondRow);
-      }
+          let lessonUnlocked = isUnlocked;
+
+          if (currentIndex > 0) {
+            const prevLesson = sortedLessons[currentIndex - 1];
+            lessonUnlocked = completedLessonIds.has(prevLesson.id);
+          }
+
+          const lessonButton = document.createElement('button');
+          lessonButton.className = `flex justify-between items-center w-full px-4 py-3 rounded-lg border transition
+            ${lessonUnlocked ? 'bg-[#1C1B2E] hover:bg-[#383857] border-[#C5CAFF] text-white' : 'bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed'}`;
+          lessonButton.disabled = !lessonUnlocked;
+          if (lessonUnlocked) {
+            lessonButton.onclick = () => window.location.href = `lesson.html?level_id=${lesson.level_id}&lesson_id=${lesson.id}`;
+          }
+
+
+          lessonButton.innerHTML = `
+            <div class="flex justify-between items-center w-full">
+              <div class="flex flex-col items-start text-left">
+                <span class="font-semibold">${lesson.title}</span>
+                <span class="text-sm text-gray-400">
+                  ${lessonCompleted
+              ? 'Completed'
+              : lessonUnlocked
+                ? 'Start'
+                : 'Lesson Locked'}
+                </span>
+              </div>
+              <div class="text-sm text-right text-[#FFC400] font-medium">
+                +${lesson.xp_reward || 0} XP<br>+${lesson.gem_reward || 0} Gems
+              </div>
+            </div>
+          `;
+
+          lessonContainer.appendChild(lessonButton);
+        });
+
+        container.appendChild(levelCard);
+      });
     }
 
     async function updateUserStatsWithStreakLogic() {

@@ -8,14 +8,100 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0"></script>
+
+  <style>
+    @keyframes flash-green {
+      0% {
+        background-color: transparent;
+      }
+
+      50% {
+        background-color: #32CD32;
+      }
+
+      100% {
+        background-color: transparent;
+      }
+    }
+
+    @keyframes flash-red {
+      0% {
+        background-color: transparent;
+      }
+
+      50% {
+        background-color: #FF4D4F;
+      }
+
+      100% {
+        background-color: transparent;
+      }
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-6px);
+      }
+
+      75% {
+        transform: translateX(6px);
+      }
+    }
+
+    .flash-green {
+      animation: flash-green 0.6s ease-in-out;
+    }
+
+    .flash-red {
+      animation: flash-red 0.6s ease-in-out;
+    }
+
+    .shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    .feedback-popup {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #2A2A3C;
+      border: 2px solid white;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 1rem;
+      z-index: 50;
+      opacity: 0;
+      animation: fadeUp 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeUp {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -20px);
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-[#1C1B2E] text-white font-sans">
-  <!-- Top Navigation -->
+  <!-- Top Bar -->
   <div class="fixed top-0 left-0 w-full z-50">
     <div class="flex items-center justify-between px-6 py-4 bg-[#14142B] border-b border-[#2a2a3c]">
       <button onclick="confirmExit()" class="text-sm text-red-400 hover:text-red-600 font-medium">✖ Exit</button>
@@ -36,111 +122,117 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const urlParams = new URLSearchParams(window.location.search);
     const levelId = urlParams.get("level_id");
+    const lessonId = urlParams.get("lesson_id");
 
-    let webcamStream = null;
-    let gestureCallback = null;
-    let hands, camera;
-    let model, gestureLabels;
-    let predictionBuffer = [];
-    let predictionTimer = null;
-    let steps = [], stepIndex = 0;
+    let webcamStream = null, gestureCallback = null, hands, camera, model, gestureLabels = [];
+    let predictionBuffer = [], predictionTimer = null, steps = [], stepIndex = 0;
 
     async function loadGestureModel() {
       model = await tf.loadLayersModel('/model/model.json');
-      const response = await fetch('/model/labels.json');
-      gestureLabels = await response.json();
+      const res = await fetch('/model/labels.json');
+      gestureLabels = await res.json();
     }
 
     async function fetchLessonContent() {
       await loadGestureModel();
-      const { data: lessons } = await supabase
-        .from("lesson")
-        .select("id")
-        .eq("level_id", levelId)
-        .order("order", { ascending: true })
-        .limit(1);
+      const { data: lessonSigns } = await supabase.from("lesson_signs").select("*").eq("lesson_id", lessonId).order("order");
+      const { data: lessonQuestions } = await supabase.from("lesson_questions").select("*").eq("lesson_id", lessonId);
+      if (!lessonSigns || !lessonQuestions) return;
+      const used = new Set();
 
-      if (!lessons || lessons.length === 0) {
-        document.getElementById("lesson-container").innerHTML = "<p>No lesson found for this level.</p>";
-        return;
-      }
-
-      const lessonId = lessons[0].id;
-      const { data: lessonSigns } = await supabase
-        .from("lesson_signs")
-        .select("*")
-        .eq("lesson_id", lessonId)
-        .order("order");
-
-      const { data: lessonQuestions } = await supabase
-        .from("lesson_questions")
-        .select("*")
-        .eq("lesson_id", lessonId);
-
-      const usedQuestionIds = new Set();
-
-      // Add each sign and its gesture question
-      for (let sign of lessonSigns) {
+      lessonSigns.forEach(sign => {
         steps.push({ type: 'sign', data: sign });
+        const gestureQ = lessonQuestions.find(q => q.type === 'gesture' && q.answer === sign.gloss);
+        if (gestureQ) { steps.push({ type: 'question', data: gestureQ }); used.add(gestureQ.id); }
+      });
 
-        const relatedGesture = lessonQuestions.find(q =>
-          q.type === 'gesture' && q.answer === sign.gloss
-        );
-
-        if (relatedGesture) {
-          steps.push({ type: 'question', data: relatedGesture });
-          usedQuestionIds.add(relatedGesture.id);
-        }
-      }
-
-      // Add remaining flashcard and multiple-choice questions
-      for (let q of lessonQuestions) {
-        if ((q.type === 'flashcard' || q.type === 'multiple-choice') && !usedQuestionIds.has(q.id)) {
-          steps.push({ type: 'question', data: q });
-        }
-      }
+      lessonQuestions.forEach(q => {
+        if (!used.has(q.id) && (q.type === 'flashcard' || q.type === 'multiple-choice')) steps.push({ type: 'question', data: q });
+      });
 
       renderStep();
     }
 
+    async function rewardPlayer() {
+      const { data: session } = await supabase.auth.getSession();
+      const userId = session?.session?.user?.id;
+      if (!userId) return;
+
+      // Update user_progress table (requires proper RLS policy)
+      const { error: progressError } = await supabase.from("user_progress").upsert({
+        user_id: userId,
+        lesson_id: lessonId,
+        is_completed: true,
+        completed_at: new Date().toISOString()
+      }, { onConflict: ['user_id', 'lesson_id'] });
+
+      if (progressError) {
+        console.error("Failed to save user_progress:", progressError);
+      }
+
+      // Fetch current XP and Gems
+      const { data: userData, error: userFetchError } = await supabase
+        .from("users")
+        .select("xp, gems")
+        .eq("id", userId)
+        .single();
+
+      if (userFetchError || !userData) {
+        console.error("Failed to fetch user XP/Gems:", userFetchError);
+        return;
+      }
+
+      // Update with new XP and Gems
+      const newXP = (userData.xp || 0) + 25;
+      const newGems = (userData.gems || 0) + 10;
+
+      const { error: xpUpdateError } = await supabase
+        .from("users")
+        .update({ xp: newXP, gems: newGems })
+        .eq("id", userId);
+
+      if (xpUpdateError) {
+        console.error("Error updating XP and Gems:", xpUpdateError);
+      }
+    }
+
+
     function renderStep() {
       stopWebcam();
+      const container = document.getElementById("lesson-container");
       if (stepIndex >= steps.length) {
-        document.getElementById("lesson-container").innerHTML = `
+        rewardPlayer();
+        container.innerHTML = `
           <div class="text-center mt-20">
             <h2 class="text-3xl font-bold mb-4">🎉 Lesson Completed!</h2>
-            <button onclick="window.location.href='homepage.html'" class="mt-4 px-6 py-3 bg-green-500 text-white text-lg rounded-lg shadow hover:bg-green-600">Go Home</button>
-          </div>
-        `;
+            <p class="text-lg mb-4">+25 XP & +10 Gems</p>
+            <button onclick="window.location.href='homepage.html'" class="mt-4 px-6 py-3 bg-green-500 text-white text-lg rounded-lg hover:bg-green-600">Go Home</button>
+          </div>`;
         return;
       }
 
       const step = steps[stepIndex];
-      const container = document.getElementById("lesson-container");
       container.innerHTML = "";
+      document.getElementById("progress-bar").style.width = `${((stepIndex + 1) / steps.length) * 100}%`;
 
-      const isGesture = step.type === 'sign' || (step.type === 'question' && step.data.type === 'gesture');
-
-      if (isGesture) {
+      if (step.type === 'sign' || (step.type === 'question' && step.data.type === 'gesture')) {
         const isSign = step.type === 'sign';
         const { word, description, video_url, gloss } = isSign ? step.data : {};
-        const q = step.data;
-        const glossToUse = isSign ? gloss : q.answer;
-        const title = isSign ? `Learn: ${word}` : q.question;
+        const glossToUse = isSign ? gloss : step.data.answer;
+        const title = isSign ? `Learn: ${word}` : step.data.question;
 
         container.innerHTML = `
-          <div class="flex flex-col md:flex-row justify-between gap-10 items-center transition-all">
-            <div class="w-full md:w-1/2 bg-[#24243A] p-6 rounded-xl shadow-lg">
+          <div class="flex flex-col md:flex-row gap-10 items-center">
+            <div class="w-full md:w-1/2 bg-[#24243A] p-6 rounded-xl">
               <h2 class="text-3xl font-bold text-[#FFC400] mb-4">${title}</h2>
-              ${isSign ? `<video src="${video_url}" controls class="w-full rounded mb-4 max-h-64"></video><p class="text-gray-300 text-lg">${description}</p>` : ""}
+              ${isSign ? `<video src="${video_url}" controls class="w-full rounded mb-4 max-h-64"></video><p>${description}</p>` : ""}
             </div>
-            <div class="w-full md:w-1/2 flex flex-col items-center">
-              <video id="webcam" autoplay playsinline class="rounded-xl border border-gray-500 shadow max-w-md w-full aspect-video"></video>
-              <div id="gesture-feedback" class="mt-3 text-lg font-semibold text-green-400"></div>
-              <button id="tryGestureBtn" class="mt-4 px-6 py-3 text-lg bg-[#FFC400] text-black font-bold rounded-full hover:scale-105 transition">Analyzing...</button>
+            <div class="w-full md:w-1/2 text-center">
+              <video id="webcam" autoplay playsinline class="rounded-xl border border-gray-500 w-full aspect-video"></video>
+              <div id="gesture-feedback" class="mt-3 text-lg font-semibold"></div>
+              <button id="tryGestureBtn" class="mt-4 px-6 py-3 bg-[#FFC400] text-black font-bold rounded-full">Analyzing...</button>
             </div>
-          </div>
-        `;
+          </div>`;
 
         initWebcam();
         setupMediaPipe();
@@ -148,66 +240,100 @@
         setTimeout(() => {
           const btn = document.getElementById("tryGestureBtn");
           btn.innerText = "Try Gesture";
-          btn.disabled = false;
           btn.onclick = () => {
             btn.disabled = true;
             btn.innerText = "Analyzing...";
             startGestureSession(glossToUse, success => {
               const feedback = document.getElementById("gesture-feedback");
               if (success) {
-                feedback.innerHTML = "✅ <span class='text-green-300'>Correct!</span>";
+                const webcam = document.getElementById("webcam");
+                webcam.classList.remove("flash-red");
+                webcam.classList.add("flash-green");
+
+                feedback.innerHTML = `<div class="text-green-400 font-bold text-xl">✅ Correct!</div>`;
                 btn.innerText = "Continue";
+
+                const popup = document.createElement("div");
+                popup.className = "feedback-popup text-green-300";
+                popup.textContent = "Correct!";
+                webcam.parentElement.appendChild(popup);
+                setTimeout(() => popup.remove(), 1000);
+
                 btn.disabled = false;
                 btn.onclick = () => { stepIndex++; renderStep(); };
               } else {
-                feedback.innerHTML = "❌ <span class='text-red-300'>Try Again.</span>";
+                webcam.classList.remove("flash-green");
+                webcam.classList.add("flash-red", "shake");
+                setTimeout(() => webcam.classList.remove("flash-red", "shake"), 600);
+
+                feedback.innerHTML = `<div class="text-red-400 font-bold text-xl">❌ Try Again</div>`;
+
+                const popup = document.createElement("div");
+                popup.className = "feedback-popup text-red-300";
+                popup.textContent = "Wrong!";
+                webcam.parentElement.appendChild(popup);
+                setTimeout(() => popup.remove(), 1000);
+
                 btn.innerText = "Try Again";
                 btn.disabled = false;
               }
             });
           };
         }, 600);
-
-      } else if (step.type === 'question') {
+      } else {
         const q = step.data;
-        let options = [];
-        if (q.choices) {
-          try {
-            options = typeof q.choices === 'string' ? JSON.parse(q.choices) : q.choices;
-          } catch (e) {
-            console.error("Invalid choices JSON", e);
-          }
-        } else {
-          console.warn("No choices provided for question:", q);
-        }
+        let choices = [];
+        try {
+          choices = typeof q.choices === 'string' ? JSON.parse(q.choices) : q.choices || [];
+        } catch (e) { console.error("Invalid JSON", e); }
 
         container.innerHTML = `
-          <div class="text-center max-w-xl mx-auto">
+          <div class="text-center max-w-3xl mx-auto">
             <h2 class="text-2xl font-bold mb-6">${q.question}</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              ${options.map(opt => `
-                <button class="py-3 px-5 bg-gray-700 text-white rounded-lg hover:bg-[#FFC400] hover:text-black transition" onclick="checkAnswer('${opt}', '${q.answer}')">${opt}</button>
-              `).join('')}
+            <div class="grid sm:grid-cols-2 gap-6">
+              ${choices.map(choice => {
+          const isImage = choice.startsWith("http");
+          const content = isImage ? `<img src="${choice}" class="rounded w-full h-40 object-contain" />` : `<span class='text-lg'>${choice}</span>`;
+          return `<button class="bg-[#2a2a3c] rounded-xl p-4 hover:bg-[#FFC400] hover:text-black transition" onclick="checkAnswer(this, '${choice}', '${q.answer}')">${content}</button>`;
+        }).join('')}
             </div>
-          </div>
-        `;
+          </div>`;
       }
-
-      document.getElementById("progress-bar").style.width = `${Math.floor(((stepIndex + 1) / steps.length) * 100)}%`;
     }
 
-    function checkAnswer(selected, correct) {
+    function checkAnswer(button, selected, correct) {
+      const buttons = document.querySelectorAll("button");
+      buttons.forEach(btn => btn.disabled = true);
+      const selectedBtn = button;
+
       if (selected === correct) {
-        stepIndex++;
-        renderStep();
+        selectedBtn.classList.add("flash-green");
+        const popup = document.createElement("div");
+        popup.className = "feedback-popup text-green-300";
+        popup.textContent = "Correct!";
+        selectedBtn.appendChild(popup);
+        setTimeout(() => {
+          popup.remove();
+          stepIndex++;
+          renderStep();
+        }, 800);
       } else {
-        alert("Incorrect. Try again.");
+        selectedBtn.classList.add("flash-red", "shake");
+        const popup = document.createElement("div");
+        popup.className = "feedback-popup text-red-300";
+        popup.textContent = "Wrong!";
+        selectedBtn.appendChild(popup);
+        setTimeout(() => {
+          popup.remove();
+          selectedBtn.classList.remove("flash-red", "shake");
+          buttons.forEach(btn => btn.disabled = false);
+        }, 800);
       }
+
     }
 
-    function startGestureSession(expectedGloss, callback) {
-      gestureCallback = { expected: expectedGloss, callback };
-      predictionBuffer = [];
+    function startGestureSession(expected, callback) {
+      gestureCallback = { expected, callback }; predictionBuffer = [];
       if (predictionTimer) clearTimeout(predictionTimer);
       predictionTimer = setTimeout(() => evaluateGesturePrediction(), 2500);
     }
@@ -218,71 +344,56 @@
       const input = normalize(raw);
       if (!input) return;
       const prediction = model.predict(tf.tensor([input]));
-      prediction.array().then(predictionArray => {
-        const maxIndex = predictionArray[0].indexOf(Math.max(...predictionArray[0]));
-        const predictedLabel = gestureLabels[maxIndex];
-        predictionBuffer.push(predictedLabel);
+      prediction.array().then(arr => {
+        const maxIdx = arr[0].indexOf(Math.max(...arr[0]));
+        predictionBuffer.push(gestureLabels[maxIdx]);
       });
     }
 
     function evaluateGesturePrediction() {
-      if (!gestureCallback) return;
       const { expected, callback } = gestureCallback;
       const counts = {};
       predictionBuffer.forEach(label => counts[label] = (counts[label] || 0) + 1);
-      let topLabel = null, topCount = 0;
-      for (const label in counts) {
-        if (counts[label] > topCount) {
-          topLabel = label;
-          topCount = counts[label];
-        }
-      }
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+      callback(top === expected);
       gestureCallback = null;
-      callback(topLabel === expected);
     }
 
     function initWebcam() {
-      const webcamElement = document.getElementById("webcam");
-      if (!webcamElement) return;
-      if (navigator.mediaDevices?.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            webcamStream = stream;
-            webcamElement.srcObject = stream;
-          })
-          .catch(err => {
-            console.error("Failed to acquire camera feed:", err);
-            document.getElementById("lesson-container").innerHTML = "<p class='text-red-400'>Unable to access webcam.</p>";
-          });
-      }
+      const video = document.getElementById("webcam");
+      if (!video) return;
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        webcamStream = stream; video.srcObject = stream;
+      }).catch(err => console.error("Webcam error", err));
     }
 
     function stopWebcam() {
-      if (webcamStream) webcamStream.getTracks().forEach(track => track.stop());
+      if (webcamStream) webcamStream.getTracks().forEach(t => t.stop());
     }
 
     function setupMediaPipe() {
-      hands = new Hands({ locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+      const video = document.getElementById("webcam");
+      if (!video) return;
+      hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
       hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
       hands.onResults(onResults);
-      const videoElement = document.getElementById("webcam");
-      if (!videoElement) return;
-      camera = new Camera(videoElement, {
-        onFrame: async () => await hands.send({ image: videoElement }),
-        width: 640,
-        height: 480,
+      camera = new Camera(video, {
+        onFrame: async () => {
+          if (video.readyState >= 2) await hands.send({ image: video });
+        },
+        width: 640, height: 480
       });
       camera.start();
     }
 
     function normalize(landmarks) {
-      if (!landmarks || landmarks.length === 0) return null;
+      if (!landmarks?.length) return null;
       const base = landmarks[0];
       return landmarks.flatMap(pt => [pt.x - base.x, pt.y - base.y, pt.z - base.z]);
     }
 
     function confirmExit() {
-      if (confirm("Are you sure you want to exit? Your progress will not be saved.")) {
+      if (confirm("Exit this lesson? Progress may not be saved.")) {
         stopWebcam();
         window.location.href = "homepage.html";
       }
