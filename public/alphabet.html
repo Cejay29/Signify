@@ -2,187 +2,156 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="menu.css" />
-    <title>Alphabet & More</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alphabet & More</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <style>
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fade-in-up {
+      animation: fadeInUp 0.5s ease-out both;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      font-weight: 600;
+      color: white;
+      border-radius: 8px;
+      background: transparent;
+      transition: background 0.2s;
+    }
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .nav-icon {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+  </style>
 </head>
 
-<body>
-    <div class="menu">
-        <h2 class="logo">Signify</h2>
-        <button class="menu-btn" onclick="window.location.href='homepage.html'">
-            <img src="learn.png" class="learn">LEARN
-        </button>
-        <button class="menu-btn active" onclick="window.location.href='alphabet.html'">
-            <img src="letter.png" class="letter">ALPHABET & MORE
-        </button>
-        <button class="menu-btn" onclick="window.location.href='shop.html'">
-            <img src="shop.png" class="shop">SHOP
-        </button>
-        <button class="menu-btn" onclick="window.location.href='profile.html'">
-            <img src="profile.png" class="profile">PROFILE</button>
-        <div class="menu-dropdown">
-            <button class="menu-btn">
-                <img src="more.png" class="more">MORE
-            </button>
-            <div class="dropdown-content">
-                <button class="logout-btn">LOG OUT</button>
-            </div>
-        </div>
+<body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] font-inter">
+  <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
+    <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
+    <nav class="flex flex-col gap-4 mt-4">
+      <button class="nav-btn" onclick="window.location.href='homepage.html'"><img src="img/learn.png" class="nav-icon"> LEARN</button>
+      <button class="nav-btn active"><img src="img/letter.png" class="nav-icon"> ALPHABET & MORE</button>
+      <button class="nav-btn" onclick="window.location.href='shop.html'"><img src="img/shop.png" class="nav-icon"> SHOP</button>
+      <button class="nav-btn" onclick="window.location.href='profile.html'"><img src="img/profile.png" class="nav-icon"> PROFILE</button>
+      <button class="nav-btn"><img src="img/more.png" class="nav-icon"> MORE</button>
+    </nav>
+  </aside>
+
+  <main class="flex-1 overflow-y-auto px-6 pb-12">
+    <header class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
+      <div class="flex items-center gap-2 tooltip"><img src="img/flag.png" class="w-7 h-7 rounded-full border-2 border-white" alt="Language"></div>
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse" alt="Streak"><span class="streak-value font-bold">0</span></div>
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span class="gems-value font-bold">0</span></div>
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/heart.png" class="w-7 h-7" alt="Hearts"><span class="hearts-value font-bold">0</span></div>
+    </header>
+
+    <section class="pt-40">
+      <div class="flex justify-center gap-10 border-b border-gray-700 pb-4">
+        <div class="tab cursor-pointer text-white font-bold uppercase px-4 py-2 border-b-4 border-[#C5CAFF] transition-all duration-300" onclick="switchTab('alphabet')">Alphabet</div>
+        <div class="tab cursor-pointer text-gray-400 hover:text-white px-4 py-2 transition-all duration-300" onclick="switchTab('numbers')">Numbers</div>
+        <div class="tab cursor-pointer text-gray-400 hover:text-white px-4 py-2 transition-all duration-300" onclick="switchTab('words')">Words</div>
+      </div>
+
+      <div id="alphabet" class="tab-content grid grid-cols-4 md:grid-cols-6 gap-6 mt-10 justify-items-center"></div>
+      <div id="numbers" class="tab-content hidden grid grid-cols-5 md:grid-cols-10 gap-6 mt-10 justify-items-center"></div>
+      <div id="words" class="tab-content hidden grid grid-cols-2 md:grid-cols-4 gap-6 mt-10 justify-items-center"></div>
+    </section>
+  </main>
+
+  <div id="letterModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+    <div class="bg-[#2a2a3c] p-6 rounded-lg text-center text-white max-w-sm w-full relative animate-fade-in-up">
+      <button class="absolute top-2 right-4 text-2xl font-bold hover:text-[#FFC400]" onclick="toggleModal(false)">&times;</button>
+      <img id="modal-img" src="" class="w-full mb-4 rounded">
+      <p id="modal-letter" class="text-3xl font-bold text-[#FFC400]"></p>
     </div>
+  </div>
 
-    <div class="main-content">
-        <div class="top-stats-bar">
-            <div class="stat"><img src="flag.png" alt="US Flag" /></div>
-            <div class="stat"><img src="fire.png" alt="Streak" /><span>1</span></div>
-            <div class="stat"><img src="gem.png" alt="Gems" /><span>200</span></div>
-            <div class="stat"><img src="heart.png" alt="Hearts" /><span>5</span></div>
-        </div>
+  <script>
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
+    const words = ['hello', 'thankyou', 'please', 'goodbye'];
 
-        <div class="content-wrapper">
-            <div class="tab-container">
-                <div class="tab active" data-tab="alphabet">Alphabet</div>
-                <div class="tab" data-tab="numbers">Numbers</div>
-                <div class="tab" data-tab="words">Words</div>
-            </div>
+    function createCard(src, label) {
+      return `<div class="bg-[#2a2a3c] p-4 rounded-lg text-center cursor-pointer hover:scale-105 hover:bg-[#383857] transition-transform duration-200 animate-fade-in-up" onclick="openModal('${src}', '${label}')">
+        <img src="${src}" class="w-20 h-20 object-contain mx-auto mb-2">
+        <span class="text-white font-semibold text-lg">${label}</span>
+      </div>`;
+    }
 
-            <!-- Alphabet Section -->
-            <div class="tab-content active-tab" id="alphabet">
-                <div class="alphabet-container">
-                    <h2 class="alphabet-title">Sign Language Alphabet</h2>
-                    <div class="alphabet-grid">
-                        <!-- A-Z -->
-                        <div class="letter-box"><img src="signs/a.png" alt="Sign for A"><span>A</span></div>
-                        <div class="letter-box"><img src="signs/b.png" alt="Sign for B"><span>B</span></div>
-                        <div class="letter-box"><img src="signs/c.png" alt="Sign for C"><span>C</span></div>
-                        <div class="letter-box"><img src="signs/d.png" alt="Sign for D"><span>D</span></div>
-                        <div class="letter-box"><img src="signs/e.png" alt="Sign for E"><span>E</span></div>
-                        <div class="letter-box"><img src="signs/f.png" alt="Sign for F"><span>F</span></div>
-                        <div class="letter-box"><img src="signs/g.png" alt="Sign for G"><span>G</span></div>
-                        <div class="letter-box"><img src="signs/h.png" alt="Sign for H"><span>H</span></div>
-                        <div class="letter-box"><img src="signs/i.png" alt="Sign for I"><span>I</span></div>
-                        <div class="letter-box"><img src="signs/j.png" alt="Sign for J"><span>J</span></div>
-                        <div class="letter-box"><img src="signs/k.png" alt="Sign for K"><span>K</span></div>
-                        <div class="letter-box"><img src="signs/l.png" alt="Sign for L"><span>L</span></div>
-                        <div class="letter-box"><img src="signs/m.png" alt="Sign for M"><span>M</span></div>
-                        <div class="letter-box"><img src="signs/n.png" alt="Sign for N"><span>N</span></div>
-                        <div class="letter-box"><img src="signs/o.png" alt="Sign for O"><span>O</span></div>
-                        <div class="letter-box"><img src="signs/p.png" alt="Sign for P"><span>P</span></div>
-                        <div class="letter-box"><img src="signs/q.png" alt="Sign for Q"><span>Q</span></div>
-                        <div class="letter-box"><img src="signs/r.png" alt="Sign for R"><span>R</span></div>
-                        <div class="letter-box"><img src="signs/s.png" alt="Sign for S"><span>S</span></div>
-                        <div class="letter-box"><img src="signs/t.png" alt="Sign for T"><span>T</span></div>
-                        <div class="letter-box"><img src="signs/u.png" alt="Sign for U"><span>U</span></div>
-                        <div class="letter-box"><img src="signs/v.png" alt="Sign for V"><span>V</span></div>
-                        <div class="letter-box"><img src="signs/w.png" alt="Sign for W"><span>W</span></div>
-                        <div class="letter-box"><img src="signs/x.png" alt="Sign for X"><span>X</span></div>
-                        <div class="letter-box"><img src="signs/y.png" alt="Sign for Y"><span>Y</span></div>
-                        <div class="letter-box"><img src="signs/z.png" alt="Sign for Z"><span>Z</span></div>
-                    </div>
-                </div>
-            </div>
+    document.getElementById('alphabet').innerHTML = alphabet.map(l => createCard(`signs/${l.toLowerCase()}.png`, l)).join('');
+    document.getElementById('numbers').innerHTML = numbers.map(n => createCard(`signs/${n}.png`, n)).join('');
+    document.getElementById('words').innerHTML = words.map(w => createCard(`signs/${w}.png`, w.charAt(0).toUpperCase() + w.slice(1))).join('');
 
-            <!-- Numbers Section -->
-            <div class="tab-content" id="numbers">
-                <div class="numbers-container">
-                    <h2 class="numbers-title">Sign Language Numbers</h2>
-                    <div class="alphabet-grid">
-                        <div class="letter-box"><img src="signs/1.png" alt="Sign for 1"><span>1</span></div>
-                        <div class="letter-box"><img src="signs/2.png" alt="Sign for 2"><span>2</span></div>
-                        <div class="letter-box"><img src="signs/3.png" alt="Sign for 3"><span>3</span></div>
-                        <div class="letter-box"><img src="signs/4.png" alt="Sign for 4"><span>4</span></div>
-                        <div class="letter-box"><img src="signs/5.png" alt="Sign for 5"><span>5</span></div>
-                        <div class="letter-box"><img src="signs/6.png" alt="Sign for 6"><span>6</span></div>
-                        <div class="letter-box"><img src="signs/7.png" alt="Sign for 7"><span>7</span></div>
-                        <div class="letter-box"><img src="signs/8.png" alt="Sign for 8"><span>8</span></div>
-                        <div class="letter-box"><img src="signs/9.png" alt="Sign for 9"><span>9</span></div>
-                        <div class="letter-box"><img src="signs/10.png" alt="Sign for 10"><span>10</span></div>
-                    </div>
-                </div>
-            </div>
+    function openModal(src, label) {
+      document.getElementById('modal-img').src = src;
+      document.getElementById('modal-letter').textContent = label;
+      toggleModal(true);
+    }
 
-            <!-- Words Section -->
-            <div class="tab-content" id="words">
-                <div class="words-container">
-                    <h2 class="words-title">Sign Language Words</h2>
-                    <div class="alphabet-grid">
-                        <div class="letter-box"><img src="signs/hello.png" alt="Hello"><span>Hello</span></div>
-                        <div class="letter-box"><img src="signs/thankyou.png" alt="Thank You"><span>Thank You</span>
-                        </div>
-                        <div class="letter-box"><img src="signs/please.png" alt="Please"><span>Please</span></div>
-                        <div class="letter-box"><img src="signs/goodbye.png" alt="Goodbye"><span>Goodbye</span></div>
-                    </div>
-                </div>
-            </div>
+    function toggleModal(show) {
+      const modal = document.getElementById('letterModal');
+      modal.classList.toggle('flex', show);
+      modal.classList.toggle('hidden', !show);
+    }
 
+    function switchTab(tab) {
+      ['alphabet', 'numbers', 'words'].forEach(id => {
+        document.getElementById(id).classList.toggle('hidden', id !== tab);
+      });
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.remove('text-white', 'border-b-4', 'border-[#C5CAFF]');
+        t.classList.add('text-gray-400');
+      });
+      const activeTab = Array.from(document.querySelectorAll('.tab')).find(t => t.textContent.trim().toLowerCase() === tab);
+      if (activeTab) {
+        activeTab.classList.add('text-white', 'border-b-4', 'border-[#C5CAFF]');
+        activeTab.classList.remove('text-gray-400');
+      }
+    }
 
-        </div>
-    </div>
-
-    <!-- Modal -->
-    <div id="letterModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <img id="modal-img" src="" alt="Sign Language Letter" />
-            <p id="modal-letter"></p>
-        </div>
-    </div>
-
-    <script>
-        // Tabs switching logic
-        const tabs = document.querySelectorAll('.tab');
-        const contents = document.querySelectorAll('.tab-content');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remove previous active classes
-                tabs.forEach(t => t.classList.remove('active'));
-                contents.forEach(c => c.classList.remove('active-tab'));
-
-                // Set current tab and content as active
-                tab.classList.add('active');
-                const target = tab.getAttribute('data-tab');
-                document.getElementById(target).classList.add('active-tab');
-
-                // Scroll main content to top
-                document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
-            });
-        });
-
-        // Modal logic
-        const modal = document.getElementById('letterModal');
-        const modalImg = document.getElementById('modal-img');
-        const modalLetter = document.getElementById('modal-letter');
-        const closeBtn = document.querySelector('.close-btn');
-
-        function openModal(imgSrc, label) {
-            modalImg.src = imgSrc;
-            modalLetter.textContent = label;
-            modal.style.display = 'block';
-        }
-
-        document.body.addEventListener('click', (e) => {
-            if (e.target.classList.contains('letter-box') || e.target.closest('.letter-box')) {
-                const box = e.target.closest('.letter-box');
-                const img = box.querySelector('img').src;
-                const label = box.querySelector('span').textContent;
-                openModal(img, label);
-            }
-        });
-
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        window.addEventListener('click', e => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-    </script>
-
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    async function updateUserStatsWithStreakLogic() {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return;
+      const { data: userData } = await supabase.from('users').select('hearts, gems, streak, last_active').eq('id', user.id).single();
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      let updatedStreak = userData.streak || 0;
+      if (userData.last_active) {
+        const lastActiveDate = new Date(userData.last_active);
+        const diffInDays = Math.floor((today - lastActiveDate) / (1000 * 60 * 60 * 24));
+        updatedStreak = diffInDays === 1 ? updatedStreak + 1 : diffInDays > 1 ? 1 : updatedStreak;
+      } else updatedStreak = 1;
+      if (userData.streak !== updatedStreak || userData.last_active?.split('T')[0] !== todayStr) {
+        await supabase.from('users').update({ streak: updatedStreak, last_active: todayStr }).eq('id', user.id);
+      }
+      document.querySelector('.hearts-value').textContent = userData.hearts ?? 0;
+      document.querySelector('.gems-value').textContent = userData.gems ?? 0;
+      document.querySelector('.streak-value').textContent = updatedStreak;
+    }
+    updateUserStatsWithStreakLogic();
+  </script>
 </body>
 
 </html>

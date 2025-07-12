@@ -45,26 +45,26 @@
   <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
     <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
     <nav class="flex flex-col gap-4 mt-4">
-      <button class="nav-btn active"><img src="learn.png" class="nav-icon"> LEARN</button>
-      <button class="nav-btn" onclick="window.location.href='alphabet.html'"><img src="letter.png" class="nav-icon">
+      <button class="nav-btn active"><img src="img/learn.png" class="nav-icon"> LEARN</button>
+      <button class="nav-btn" onclick="window.location.href='alphabet.html'"><img src="img/letter.png" class="nav-icon">
         ALPHABET & MORE</button>
-      <button class="nav-btn"><img src="shop.png" class="nav-icon"> SHOP</button>
-      <button class="nav-btn"><img src="profile.png" class="nav-icon"> PROFILE</button>
-      <button class="nav-btn"><img src="more.png" class="nav-icon"> MORE</button>
+      <button class="nav-btn"><img src="img/shop.png" class="nav-icon"> SHOP</button>
+      <button class="nav-btn"><img src="img/profile.png" class="nav-icon"> PROFILE</button>
+      <button class="nav-btn"><img src="img/more.png" class="nav-icon"> MORE</button>
     </nav>
   </aside>
 
   <main class="flex-1 overflow-y-auto px-6 pb-12">
     <header
       class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
-      <div class="flex items-center gap-2 tooltip"><img src="flag.png"
+      <div class="flex items-center gap-2 tooltip"><img src="img/flag.png"
           class="w-7 h-7 rounded-full border-2 border-white" alt="Language"></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="fire.png" class="w-7 h-7 animate-pulse"
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse"
           alt="Streak"><span class="streak-value font-bold">0</span></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="gem.png" class="w-7 h-7" alt="Gems"><span
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span
           class="gems-value font-bold">0</span></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="heart.png" class="w-7 h-7" alt="Hearts"><span
-          class="hearts-value font-bold">0</span></div>
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/heart.png" class="w-7 h-7"
+          alt="Hearts"><span class="hearts-value font-bold">0</span></div>
     </header>
 
     <section class="pt-40">
@@ -133,12 +133,23 @@
           }
 
           const lessonButton = document.createElement('button');
-          lessonButton.className = `flex justify-between items-center w-full px-4 py-3 rounded-lg border transition
-            ${lessonUnlocked ? 'bg-[#1C1B2E] hover:bg-[#383857] border-[#C5CAFF] text-white' : 'bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed'}`;
-          lessonButton.disabled = !lessonUnlocked;
-          if (lessonUnlocked) {
+          const isLocked = !lessonUnlocked;
+          const isCompleted = lessonCompleted;
+
+          lessonButton.className = `
+          flex justify-between items-center w-full px-4 py-3 rounded-lg border transition
+          ${isLocked
+              ? 'bg-gray-700 border-gray-600 text-gray-400 opacity-50 cursor-not-allowed'
+              : 'bg-[#1C1B2E] hover:bg-[#383857] border-[#C5CAFF] text-white'}
+              ${isCompleted ? 'cursor-not-allowed' : ''}
+            `;
+
+          lessonButton.disabled = isLocked || isCompleted;
+
+          if (!isLocked && !isCompleted) {
             lessonButton.onclick = () => window.location.href = `lesson.html?level_id=${lesson.level_id}&lesson_id=${lesson.id}`;
           }
+
 
 
           lessonButton.innerHTML = `
