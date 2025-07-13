@@ -79,6 +79,69 @@
             let countdown = 3;
             statusEl.innerText = `⏳ Get ready... ${countdown}`;
 
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    statusEl.innerText = `⏳ Get ready... ${countdown}`;
+                } else {
+                    clearInterval(countdownInterval);
+                    startCapture(label);
+                }
+            }, 1000);
+        };
+
+        function startCapture(label) {
+            statusEl.innerText = `🎬 Capturing samples for "${label}"...`;
+
+            const duration = 6000; // 6 seconds
+            const interval = 200;  // every 200ms
+            const endTime = Date.now() + duration;
+
+            let captured = 0;
+
+            const captureInterval = setInterval(async () => {
+                if (Date.now() >= endTime) {
+                    clearInterval(captureInterval);
+                    statusEl.innerText = `✅ Done! Captured ${captured} samples for "${label}".`;
+                    return;
+                }
+
+                if (
+                    currentLandmarks &&
+                    Array.isArray(currentLandmarks) &&
+                    currentLandmarks.length === 21 &&
+                    currentLandmarks.every(pt => 'x' in pt && 'y' in pt && 'z' in pt)
+                ) {
+                    const sample = {
+                        gloss: label,
+                        landmarks: currentLandmarks
+                    };
+
+                    const { error } = await supabase.from("gesture_sample").insert([sample]);
+
+                    if (!error) {
+                        gestureSamples.push(sample);
+                        captured++;
+                        statusEl.innerText = `📸 Capturing... ${captured}`;
+                    } else {
+                        console.error("❌ Supabase insert error:", error);
+                        statusEl.innerText = "❌ Error saving sample.";
+                    }
+                } else {
+                    statusEl.innerText = "⚠️ No valid hand detected.";
+                }
+            }, interval);
+        }
+        saveBtn.onclick = async () => {
+            const label = labelInput.value.trim().toUpperCase();
+            if (!label) {
+                statusEl.innerText = "⚠️ Please provide a label.";
+                return;
+            }
+
+            let countdown = 3;
+            statusEl.innerText = `⏳ Get ready... ${countdown}`;
+
             // Countdown before capture
             const countdownInterval = setInterval(() => {
                 countdown--;
