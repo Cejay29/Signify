@@ -138,11 +138,10 @@
                 options: {
                     data: {
                         username,
-                        last_name: lastName,
                         birthday,
                         gender
                     },
-                    emailRedirectTo: 'https://zany-winner-5g9p77xxgr7727r4r-5500.app.github.dev/login.html'
+                    emailRedirectTo: 'https://congenial-xylophone-7vx4jjppvrr9hw6w-5500.app.github.dev/login.html'
                 }
             });
 
@@ -151,22 +150,6 @@
                 signupBtn.disabled = false;
                 signupBtn.innerText = "Sign Up";
                 return;
-            }
-
-            if (data.user) {
-                const { error: insertError } = await supabase.from('users').insert({
-                    id: data.user.id,
-                    username,
-                    email: data.user.email,
-                    xp: 0,
-                    gems: 0,
-                    birthday,
-                    gender
-                });
-
-                if (insertError) {
-                    console.error("Insert user error:", insertError.message);
-                }
             }
 
             showToast("Signup successful! Check your email to confirm.", 'bg-green-500', 'text-white');
