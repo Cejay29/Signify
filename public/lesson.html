@@ -7,6 +7,7 @@
   <title>Lesson</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -118,6 +119,7 @@
   <!-- Lesson Content -->
   <div id="lesson-container" class="pt-32 px-6 max-w-6xl mx-auto transition-all duration-300"></div>
 
+  <!-- Inside your <script> tag in lesson.html -->
   <script>
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const urlParams = new URLSearchParams(window.location.search);
@@ -126,11 +128,33 @@
 
     let webcamStream = null, gestureCallback = null, hands, camera, model, gestureLabels = [];
     let predictionBuffer = [], predictionTimer = null, steps = [], stepIndex = 0;
+    let totalQuestions = 0;
+    let correctAnswers = 0;
+    let xpReward = 0;
+    let gemReward = 0;
+    let lessonXPReward = 0;
+    let lessonGemsReward = 0;
+
 
     async function loadGestureModel() {
       model = await tf.loadLayersModel('/model/model.json');
       const res = await fetch('/model/labels.json');
       gestureLabels = await res.json();
+    }
+
+    async function fetchLessonData(lessonId) {
+      const { data, error } = await supabase
+        .from('lesson')
+        .select('xp_reward, gems_reward')
+        .eq('id', lessonId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching lesson rewards:", error);
+      } else {
+        lessonXPReward = data.xp_reward || 0;
+        lessonGemsReward = data.gems_reward || 0;
+      }
     }
 
     async function fetchLessonContent() {
@@ -153,64 +177,92 @@
       renderStep();
     }
 
-    async function rewardPlayer() {
-      const { data: session } = await supabase.auth.getSession();
-      const userId = session?.session?.user?.id;
-      if (!userId) return;
+    async function rewardPlayer(lessonId) {
+      const user = supabase.auth.getUser().then(({ data }) => data.user);
 
-      // Update user_progress table (requires proper RLS policy)
-      const { error: progressError } = await supabase.from("user_progress").upsert({
-        user_id: userId,
-        lesson_id: lessonId,
-        is_completed: true,
-        completed_at: new Date().toISOString()
-      }, { onConflict: ['user_id', 'lesson_id'] });
-
-      if (progressError) {
-        console.error("Failed to save user_progress:", progressError);
+      if (!lessonId) {
+        console.error('No lessonId provided to rewardPlayer.');
+        return;
       }
 
-      // Fetch current XP and Gems
-      const { data: userData, error: userFetchError } = await supabase
+      const { data: lesson, error: lessonError } = await supabase
+        .from("lesson")
+        .select("xp_reward, gem_reward")
+        .eq("id", lessonId)
+        .single();
+
+      if (lessonError) {
+        console.error("Failed to fetch lesson rewards:", lessonError);
+        return;
+      }
+
+      const xpReward = lesson.xp_reward || 0;
+      const gemReward = lesson.gem_reward || 0;
+
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const userId = userData.user.id;
+
+      // Get current XP and gems
+      const { data: currentUser, error: fetchUserError } = await supabase
         .from("users")
         .select("xp, gems")
         .eq("id", userId)
         .single();
 
-      if (userFetchError || !userData) {
-        console.error("Failed to fetch user XP/Gems:", userFetchError);
+      if (fetchUserError) {
+        console.error("Failed to fetch current user data:", fetchUserError);
         return;
       }
 
-      // Update with new XP and Gems
-      const newXP = (userData.xp || 0) + 25;
-      const newGems = (userData.gems || 0) + 10;
+      const newXP = (currentUser.xp || 0) + xpReward;
+      const newGems = (currentUser.gems || 0) + gemReward;
 
-      const { error: xpUpdateError } = await supabase
+      // Update XP and gems
+      const { error: updateError } = await supabase
         .from("users")
         .update({ xp: newXP, gems: newGems })
         .eq("id", userId);
 
-      if (xpUpdateError) {
-        console.error("Error updating XP and Gems:", xpUpdateError);
+      if (updateError) {
+        console.error("Failed to update user XP and gems:", updateError);
+        return;
       }
-    }
 
+      // Insert into user_progress table
+      const { error: progressError } = await supabase
+        .from("user_progress")
+        .upsert(
+          {
+            user_id: userId,
+            lesson_id: lessonId,
+            is_completed: true,
+            completed_at: new Date().toISOString(),
+          },
+          { onConflict: ['user_id', 'lesson_id'] } // Ensures uniqueness
+        );
+
+      if (progressError) {
+        console.error("Failed to upsert into user_progress:", progressError);
+      }
+
+
+      console.log(`+${xpReward} XP and +${gemReward} Gems awarded!`);
+    }
 
     function renderStep() {
       stopWebcam();
       const container = document.getElementById("lesson-container");
       if (stepIndex >= steps.length) {
-        rewardPlayer();
+        rewardPlayer(lessonId);
+
         container.innerHTML = `
           <div class="text-center mt-20">
             <h2 class="text-3xl font-bold mb-4">🎉 Lesson Completed!</h2>
-            <p class="text-lg mb-4">+25 XP & +10 Gems</p>
+            <p class="text-lg mb-4 text-green-400 font-semibold animate-pulse">+${lessonXPReward} XP and +${lessonGemsReward} Gems earned!</p>
             <button onclick="window.location.href='homepage.html'" class="mt-4 px-6 py-3 bg-green-500 text-white text-lg rounded-lg hover:bg-green-600">Go Home</button>
           </div>`;
         return;
       }
-
       const step = steps[stepIndex];
       container.innerHTML = "";
       document.getElementById("progress-bar").style.width = `${((stepIndex + 1) / steps.length) * 100}%`;
@@ -222,17 +274,17 @@
         const title = isSign ? `Learn: ${word}` : step.data.question;
 
         container.innerHTML = `
-          <div class="flex flex-col md:flex-row gap-10 items-center">
-            <div class="w-full md:w-1/2 bg-[#24243A] p-6 rounded-xl">
-              <h2 class="text-3xl font-bold text-[#FFC400] mb-4">${title}</h2>
-              ${isSign ? `<video src="${video_url}" controls class="w-full rounded mb-4 max-h-64"></video><p>${description}</p>` : ""}
-            </div>
-            <div class="w-full md:w-1/2 text-center">
-              <video id="webcam" autoplay playsinline class="rounded-xl border border-gray-500 w-full aspect-video"></video>
-              <div id="gesture-feedback" class="mt-3 text-lg font-semibold"></div>
-              <button id="tryGestureBtn" class="mt-4 px-6 py-3 bg-[#FFC400] text-black font-bold rounded-full">Analyzing...</button>
-            </div>
-          </div>`;
+        <div class="flex flex-col md:flex-row gap-10 items-center">
+          <div class="w-full md:w-1/2 bg-[#24243A] p-6 rounded-xl">
+            <h2 class="text-3xl font-bold text-[#FFC400] mb-4">${title}</h2>
+            ${isSign ? `<video src="${video_url}" controls class="w-full rounded mb-4 max-h-64"></video><p>${description}</p>` : ""}
+          </div>
+          <div class="w-full md:w-1/2 text-center">
+            <video id="webcam" autoplay playsinline class="rounded-xl border border-gray-500 w-full aspect-video"></video>
+            <div id="gesture-feedback" class="mt-3 text-lg font-semibold"></div>
+            <button id="tryGestureBtn" class="mt-4 px-6 py-3 bg-[#FFC400] text-black font-bold rounded-full">Analyzing...</button>
+          </div>
+        </div>`;
 
         initWebcam();
         setupMediaPipe();
@@ -246,34 +298,15 @@
             startGestureSession(glossToUse, success => {
               const feedback = document.getElementById("gesture-feedback");
               if (success) {
-                const webcam = document.getElementById("webcam");
-                webcam.classList.remove("flash-red");
-                webcam.classList.add("flash-green");
-
+                document.getElementById("webcam").classList.add("flash-green");
                 feedback.innerHTML = `<div class="text-green-400 font-bold text-xl">✅ Correct!</div>`;
                 btn.innerText = "Continue";
-
-                const popup = document.createElement("div");
-                popup.className = "feedback-popup text-green-300";
-                popup.textContent = "Correct!";
-                webcam.parentElement.appendChild(popup);
-                setTimeout(() => popup.remove(), 1000);
-
                 btn.disabled = false;
                 btn.onclick = () => { stepIndex++; renderStep(); };
               } else {
-                webcam.classList.remove("flash-green");
-                webcam.classList.add("flash-red", "shake");
-                setTimeout(() => webcam.classList.remove("flash-red", "shake"), 600);
-
+                document.getElementById("webcam").classList.add("flash-red", "shake");
+                setTimeout(() => document.getElementById("webcam").classList.remove("flash-red", "shake"), 600);
                 feedback.innerHTML = `<div class="text-red-400 font-bold text-xl">❌ Try Again</div>`;
-
-                const popup = document.createElement("div");
-                popup.className = "feedback-popup text-red-300";
-                popup.textContent = "Wrong!";
-                webcam.parentElement.appendChild(popup);
-                setTimeout(() => popup.remove(), 1000);
-
                 btn.innerText = "Try Again";
                 btn.disabled = false;
               }
@@ -282,55 +315,90 @@
         }, 600);
       } else {
         const q = step.data;
+        if (q.type === 'flashcard' || q.type === 'multiple-choice') {
+          totalQuestions++;
+        }
+
         let choices = [];
         try {
           choices = typeof q.choices === 'string' ? JSON.parse(q.choices) : q.choices || [];
         } catch (e) { console.error("Invalid JSON", e); }
 
         container.innerHTML = `
-          <div class="text-center max-w-3xl mx-auto">
-            <h2 class="text-2xl font-bold mb-6">${q.question}</h2>
-            <div class="grid sm:grid-cols-2 gap-6">
-              ${choices.map(choice => {
+        <div class="text-center max-w-3xl mx-auto">
+          <h2 class="text-2xl font-bold mb-6">${q.question}</h2>
+          <div class="grid sm:grid-cols-2 gap-6">
+            ${choices.map(choice => {
           const isImage = choice.startsWith("http");
           const content = isImage ? `<img src="${choice}" class="rounded w-full h-40 object-contain" />` : `<span class='text-lg'>${choice}</span>`;
           return `<button class="bg-[#2a2a3c] rounded-xl p-4 hover:bg-[#FFC400] hover:text-black transition" onclick="checkAnswer(this, '${choice}', '${q.answer}')">${content}</button>`;
         }).join('')}
-            </div>
-          </div>`;
+          </div>
+        </div>`;
       }
     }
 
-    function checkAnswer(button, selected, correct) {
+    async function checkAnswer(button, selected, correct) {
       const buttons = document.querySelectorAll("button");
       buttons.forEach(btn => btn.disabled = true);
-      const selectedBtn = button;
 
-      if (selected === correct) {
-        selectedBtn.classList.add("flash-green");
-        const popup = document.createElement("div");
-        popup.className = "feedback-popup text-green-300";
-        popup.textContent = "Correct!";
-        selectedBtn.appendChild(popup);
-        setTimeout(() => {
-          popup.remove();
-          stepIndex++;
-          renderStep();
-        }, 800);
-      } else {
-        selectedBtn.classList.add("flash-red", "shake");
-        const popup = document.createElement("div");
-        popup.className = "feedback-popup text-red-300";
-        popup.textContent = "Wrong!";
-        selectedBtn.appendChild(popup);
-        setTimeout(() => {
-          popup.remove();
-          selectedBtn.classList.remove("flash-red", "shake");
-          buttons.forEach(btn => btn.disabled = false);
-        }, 800);
+      const isCorrect = selected === correct;
+
+      // ✅ Trigger confetti if answer is correct
+      if (isCorrect) {
+        confetti({
+          particleCount: 75,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
       }
 
+      // Highlight correct and wrong
+      buttons.forEach(btn => {
+        const text = btn.innerText.trim();
+        if (text === correct) {
+          btn.classList.add("bg-green-500", "text-white");
+        } else if (btn === button && !isCorrect) {
+          btn.classList.add("bg-red-500", "text-white", "shake");
+        }
+      });
+
+      const popup = document.createElement("div");
+      popup.className = "feedback-popup " + (isCorrect ? "text-green-300" : "text-red-300");
+      popup.textContent = isCorrect ? "Correct!" : "Wrong!";
+      button.appendChild(popup);
+      setTimeout(() => popup.remove(), 1000);
+
+      if (!isCorrect) {
+        // Deduct heart
+        const { data: session } = await supabase.auth.getSession();
+        const userId = session?.session?.user?.id;
+        if (userId) {
+          const { data: userData } = await supabase
+            .from("users")
+            .select("hearts")
+            .eq("id", userId)
+            .single();
+
+          const newHearts = Math.max((userData?.hearts || 1) - 1, 0); // Prevent negative hearts
+          await supabase.from("users").update({ hearts: newHearts }).eq("id", userId);
+          document.getElementById("hearts-value").textContent = newHearts;
+        }
+      }
+
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "Next →";
+      nextBtn.className = "mt-6 px-6 py-3 bg-[#FFC400] text-black font-bold rounded-full hover:bg-yellow-400";
+      nextBtn.onclick = () => {
+        if (isCorrect) correctAnswers++;
+        stepIndex++;
+        renderStep();
+      };
+
+      const container = document.getElementById("lesson-container");
+      container.appendChild(nextBtn);
     }
+
 
     function startGestureSession(expected, callback) {
       gestureCallback = { expected, callback }; predictionBuffer = [];
@@ -399,8 +467,19 @@
       }
     }
 
+    async function fetchHearts() {
+      const { data: session } = await supabase.auth.getSession();
+      const userId = session?.session?.user?.id;
+      if (userId) {
+        const { data: userData } = await supabase.from("users").select("hearts").eq("id", userId).single();
+        document.getElementById("hearts-value").textContent = userData?.hearts || 0;
+      }
+    }
+
     fetchLessonContent();
+    fetchHearts();
   </script>
+
 </body>
 
 </html>
