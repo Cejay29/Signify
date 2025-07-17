@@ -2,55 +2,100 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="menu.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            font-weight: 600;
+            color: white;
+            border-radius: 8px;
+            background: transparent;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-icon {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+        }
+    </style>
 </head>
 
-<body>
-    <div class="menu">
-        <h2 class="logo">Signify</h2>
-        <button class="menu-btn" onclick="window.location.href='homepage.html'">
-            <img src="learn.png" class="learn">LEARN
-        </button>
-        <button class="menu-btn" onclick="window.location.href='alphabet.html'">
-            <img src="letter.png" class="letter">ALPHABET & MORE
-        </button>
-        <button class="menu-btn" onclick="window.location.href='shop.html'">
-            <img src="shop.png" class="shop">SHOP
-        </button>
-        <button class="menu-btn active" onclick="window.location.href='profile.html'">
-            <img src="profile.png" class="profile">PROFILE</button>
-        <div class="menu-dropdown">
-            <button class="menu-btn">
-                <img src="more.png" class="more">MORE
-            </button>
-            <div class="dropdown-content">
-                <button class="logout-btn">LOG OUT</button>
-            </div>
-        </div>
-    </div>
+<body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] font-inter">
+    <!-- Sidebar -->
+    <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
+        <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
+        <nav class="flex flex-col gap-4 mt-4">
+            <button class="nav-btn" onclick="window.location.href='homepage.html'"><img src="img/learn.png"
+                    class="nav-icon"> LEARN</button>
+            <button class="nav-btn" onclick="window.location.href='alphabet.html'"><img src="img/letter.png"
+                    class="nav-icon"> ALPHABET & MORE</button>
+            <button class="nav-btn" onclick="window.location.href='shop.html'"><img src="img/shop.png" class="nav-icon">
+                SHOP</button>
+            <button class="nav-btn active"><img src="img/profile.png" class="nav-icon"> PROFILE</button>
+            <button class="nav-btn"><img src="img/more.png" class="nav-icon"> MORE</button>
+        </nav>
+    </aside>
 
-    <div class="main-content">
-        <div class="top-stats-bar">
-            <div class="stat">
-                <img src="flag.png" alt="US Flag" />
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto px-8 pb-12">
+        <header
+            class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
+            <div class="flex items-center gap-2"><img src="img/flag.png"
+                    class="w-7 h-7 rounded-full border-2 border-white" alt="Language"></div>
+            <div class="flex items-center gap-2 text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse"
+                    alt="Streak"><span class="font-bold">1</span></div>
+            <div class="flex items-center gap-2 text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span
+                    class="font-bold">200</span></div>
+            <div class="flex items-center gap-2 text-white"><img src="img/heart.png" class="w-7 h-7" alt="Hearts"><span
+                    class="font-bold">5</span></div>
+        </header>
+
+        <section class="pt-40 max-w-4xl mx-auto text-white">
+            <!-- Cover -->
+            <div class="relative mb-6">
+                <img src="img/jm.jpg" class="w-full h-48 object-cover rounded-xl" alt="Cover Photo" />
+                <button
+                    class="absolute top-3 right-4 text-white text-xl bg-black/50 p-2 rounded-full hover:text-[#FFC400]">✎</button>
             </div>
-            <div class="stat">
-                <img src="fire.png" alt="Streak" />
-                <span>1</span>
+
+            <!-- Info -->
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold">John Travis Saguisag Cruz</h2>
+                <p class="text-gray-400">@jtsc_dick</p>
             </div>
-            <div class="stat">
-                <img src="gem.png" alt="Gems" />
-                <span>200</span>
+
+            <hr class="border-gray-600 mb-6">
+
+            <!-- Progress -->
+            <div class="mb-6">
+                <h3 class="text-2xl font-semibold mb-2">Your Progress</h3>
+                <div class="h-24 bg-[#2a2a3c] rounded-lg flex items-center justify-center text-gray-400">
+                    Coming Soon
+                </div>
             </div>
-            <div class="stat">
-                <img src="heart.png" alt="Hearts" />
-                <span>5</span>
+
+            <!-- Achievements -->
+            <div>
+                <h3 class="text-2xl font-semibold mb-2">Achievements</h3>
+                <div class="h-24 bg-[#2a2a3c] rounded-lg flex items-center justify-center text-gray-400">
+                    Coming Soon
+                </div>
             </div>
-        </div>
+        </section>
+    </main>
 </body>
 
 </html>
