@@ -287,7 +287,6 @@
         </div>`;
 
         initWebcam();
-        setupMediaPipe();
 
         setTimeout(() => {
           const btn = document.getElementById("tryGestureBtn");
@@ -407,15 +406,19 @@
     }
 
     function onResults(results) {
-      if (!gestureCallback || !results.multiHandLandmarks || !model) return;
-      const raw = results.multiHandLandmarks[0];
-      const input = normalize(raw);
-      if (!input) return;
-      const prediction = model.predict(tf.tensor([input]));
-      prediction.array().then(arr => {
-        const maxIdx = arr[0].indexOf(Math.max(...arr[0]));
-        predictionBuffer.push(gestureLabels[maxIdx]);
-      });
+      try {
+        if (!gestureCallback || !results.multiHandLandmarks || !model) return;
+        const raw = results.multiHandLandmarks[0];
+        const input = normalize(raw);
+        if (!input) return;
+        const prediction = model.predict(tf.tensor([input]));
+        prediction.array().then(arr => {
+          const maxIdx = arr[0].indexOf(Math.max(...arr[0]));
+          predictionBuffer.push(gestureLabels[maxIdx]);
+        });
+      } catch (err) {
+        console.error("Gesture prediction error:", err);
+      }
     }
 
     function evaluateGesturePrediction() {
@@ -427,11 +430,18 @@
       gestureCallback = null;
     }
 
+    let mediaPipeInitialized = false;
+
     function initWebcam() {
       const video = document.getElementById("webcam");
       if (!video) return;
       navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-        webcamStream = stream; video.srcObject = stream;
+        webcamStream = stream;
+        video.srcObject = stream;
+        if (!mediaPipeInitialized) {
+          setupMediaPipe();
+          mediaPipeInitialized = true;
+        }
       }).catch(err => console.error("Webcam error", err));
     }
 
@@ -443,7 +453,7 @@
       const video = document.getElementById("webcam");
       if (!video) return;
       hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
-      hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
+      hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
       hands.onResults(onResults);
       camera = new Camera(video, {
         onFrame: async () => {

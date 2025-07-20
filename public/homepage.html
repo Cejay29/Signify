@@ -44,13 +44,41 @@
 <body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] font-inter">
   <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
     <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
-    <nav class="flex flex-col gap-4 mt-4">
-      <button class="nav-btn active"><img src="img/learn.png" class="nav-icon"> LEARN</button>
-      <button class="nav-btn" onclick="window.location.href='alphabet.html'"><img src="img/letter.png" class="nav-icon">
-        ALPHABET & MORE</button>
-      <button class="nav-btn"><img src="img/shop.png" class="nav-icon"> SHOP</button>
-      <button class="nav-btn"><img src="img/profile.png" class="nav-icon"> PROFILE</button>
-      <button class="nav-btn"><img src="img/more.png" class="nav-icon"> MORE</button>
+    <!-- Sidebar Navigation -->
+    <nav class="flex flex-col gap-3 mt-4">
+      <button class="nav-btn active">
+        <img src="img/learn.png" class="nav-icon"> LEARN
+      </button>
+      <button class="nav-btn" onclick="window.location.href='alphabet.html'">
+        <img src="img/letter.png" class="nav-icon"> ALPHABET & MORE
+      </button>
+      <button class="nav-btn" onclick="window.location.href='shop.html'">
+        <img src="img/shop.png" class="nav-icon"> SHOP
+      </button>
+      <button class="nav-btn" onclick="window.location.href='profile.html'">
+        <img src="img/profile.png" class="nav-icon"> PROFILE
+      </button>
+
+      <!-- More Button with Dropdown -->
+      <div class="relative">
+        <button id="moreBtn" class="nav-btn w-full justify-between pr-4">
+          <div class="flex items-center gap-3">
+            <img src="img/more.png" class="nav-icon" />
+            <span>MORE</span>
+          </div>
+          <svg id="chevron" class="w-4 h-4 transition-transform duration-200 text-white" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <!-- Dropdown Content -->
+        <div id="moreDropdown" class="hidden ml-12 mt-1 space-y-1">
+          <button onclick="window.location.href='/landing.html'" class="nav-btn text-red-400 hover:bg-[#3a3a55]">
+            LOGOUT
+          </button>
+        </div>
+      </div>
     </nav>
   </aside>
 
@@ -102,6 +130,16 @@
         const isUnlocked = index === 0 || levels.slice(0, index).every(prev => {
           const prevLessons = lessons.filter(l => l.level_id === prev.id);
           return prevLessons.length > 0 && prevLessons.every(l => completedLessonIds.has(l.id));
+        });
+
+        const moreBtn = document.getElementById('moreBtn');
+        const moreDropdown = document.getElementById('moreDropdown');
+        const chevron = document.getElementById('chevron');
+
+        moreBtn.addEventListener('click', () => {
+          const isOpen = !moreDropdown.classList.contains('hidden');
+          moreDropdown.classList.toggle('hidden');
+          chevron.classList.toggle('rotate-180');
         });
 
         const levelCard = document.createElement('div');

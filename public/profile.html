@@ -2,100 +2,171 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-    <style>
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            font-weight: 600;
-            color: white;
-            border-radius: 8px;
-            background: transparent;
-            transition: background 0.2s;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      font-weight: 600;
+      color: white;
+      border-radius: 8px;
+      background: transparent;
+      transition: background 0.2s;
+    }
 
-        .nav-btn:hover,
-        .nav-btn.active {
-            background: rgba(255, 255, 255, 0.08);
-        }
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: rgba(255, 255, 255, 0.08);
+    }
 
-        .nav-icon {
-            width: 36px;
-            height: 36px;
-            object-fit: contain;
-        }
-    </style>
+    .nav-icon {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+  </style>
 </head>
 
 <body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] font-inter">
-    <!-- Sidebar -->
-    <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
-        <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
-        <nav class="flex flex-col gap-4 mt-4">
-            <button class="nav-btn" onclick="window.location.href='homepage.html'"><img src="img/learn.png"
-                    class="nav-icon"> LEARN</button>
-            <button class="nav-btn" onclick="window.location.href='alphabet.html'"><img src="img/letter.png"
-                    class="nav-icon"> ALPHABET & MORE</button>
-            <button class="nav-btn" onclick="window.location.href='shop.html'"><img src="img/shop.png" class="nav-icon">
-                SHOP</button>
-            <button class="nav-btn active"><img src="img/profile.png" class="nav-icon"> PROFILE</button>
-            <button class="nav-btn"><img src="img/more.png" class="nav-icon"> MORE</button>
-        </nav>
-    </aside>
+  <!-- Sidebar -->
+  <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
+    <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
+    <nav class="flex flex-col gap-4 mt-4">
+      <button class="nav-btn" onclick="window.location.href='homepage.html'"><img src="img/learn.png" class="nav-icon">
+        LEARN</button>
+      <button class="nav-btn" onclick="window.location.href='alphabet.html'"><img src="img/letter.png" class="nav-icon">
+        ALPHABET & MORE</button>
+      <button class="nav-btn" onclick="window.location.href='shop.html'"><img src="img/shop.png" class="nav-icon">
+        SHOP</button>
+      <button class="nav-btn active"><img src="img/profile.png" class="nav-icon"> PROFILE</button>
+      <button class="nav-btn"><img src="img/more.png" class="nav-icon"> MORE</button>
+    </nav>
+  </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto px-8 pb-12">
-        <header
-            class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
-            <div class="flex items-center gap-2"><img src="img/flag.png"
-                    class="w-7 h-7 rounded-full border-2 border-white" alt="Language"></div>
-            <div class="flex items-center gap-2 text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse"
-                    alt="Streak"><span class="font-bold">1</span></div>
-            <div class="flex items-center gap-2 text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span
-                    class="font-bold">200</span></div>
-            <div class="flex items-center gap-2 text-white"><img src="img/heart.png" class="w-7 h-7" alt="Hearts"><span
-                    class="font-bold">5</span></div>
-        </header>
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto px-8 pb-12">
+    <header
+      class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
+      <div class="flex items-center gap-2"><img src="img/flag.png" class="w-7 h-7 rounded-full border-2 border-white"
+          alt="Language"></div>
+      <div class="flex items-center gap-2 text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse"
+          alt="Streak"><span class="font-bold" id="streak">0</span></div>
+      <div class="flex items-center gap-2 text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span
+          class="font-bold" id="gems">0</span></div>
+      <div class="flex items-center gap-2 text-white"><img src="img/heart.png" class="w-7 h-7" alt="Hearts"><span
+          class="font-bold" id="hearts">0</span></div>
+    </header>
 
-        <section class="pt-40 max-w-4xl mx-auto text-white">
-            <!-- Cover -->
-            <div class="relative mb-6">
-                <img src="img/jm.jpg" class="w-full h-48 object-cover rounded-xl" alt="Cover Photo" />
-                <button
-                    class="absolute top-3 right-4 text-white text-xl bg-black/50 p-2 rounded-full hover:text-[#FFC400]">✎</button>
-            </div>
+    <section class="pt-40 max-w-4xl mx-auto text-white">
+      <!-- User Info -->
+      <div class="flex items-center gap-6 mb-6">
+        <div id="avatar"
+          class="w-28 h-28 flex items-center justify-center text-3xl font-bold rounded-full border-4 text-white shadow-xl">
+          A
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold" id="username">Loading...</h2>
+          <p class="text-gray-400" id="email">Loading...</p>
+          <p class="text-gray-400 text-sm">Level <span id="level">0</span> • XP <span id="xp">0</span></p>
+        </div>
+      </div>
 
-            <!-- Info -->
-            <div class="mb-6">
-                <h2 class="text-3xl font-bold">John Travis Saguisag Cruz</h2>
-                <p class="text-gray-400">@jtsc_dick</p>
-            </div>
+      <hr class="border-gray-600 mb-6">
 
-            <hr class="border-gray-600 mb-6">
+      <!-- Progress -->
+      <div class="mb-6">
+        <h3 class="text-2xl font-semibold mb-2">Your Progress</h3>
+        <div class="bg-[#2a2a3c] p-4 rounded-lg">
+          <div class="w-full bg-[#1C1B2E] rounded-full h-4 overflow-hidden">
+            <div id="progress-bar" class="h-4 bg-gradient-to-r from-[#FFC400] to-[#FF6B00] rounded-full transition-all"
+              style="width: 0%"></div>
+          </div>
+          <p class="text-sm text-gray-400 mt-2 text-right" id="xp-label">0 / 100 XP</p>
+        </div>
+      </div>
 
-            <!-- Progress -->
-            <div class="mb-6">
-                <h3 class="text-2xl font-semibold mb-2">Your Progress</h3>
-                <div class="h-24 bg-[#2a2a3c] rounded-lg flex items-center justify-center text-gray-400">
-                    Coming Soon
-                </div>
-            </div>
+      <!-- Achievements -->
+      <div>
+        <h3 class="text-2xl font-semibold mb-2">Achievements</h3>
+        <div class="h-24 bg-[#2a2a3c] rounded-lg flex items-center justify-center text-gray-400">
+          Coming Soon
+        </div>
+      </div>
+    </section>
+  </main>
 
-            <!-- Achievements -->
-            <div>
-                <h3 class="text-2xl font-semibold mb-2">Achievements</h3>
-                <div class="h-24 bg-[#2a2a3c] rounded-lg flex items-center justify-center text-gray-400">
-                    Coming Soon
-                </div>
-            </div>
-        </section>
-    </main>
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://lxetbblytlvihitapazv.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4ZXRiYmx5dGx2aWhpdGFwYXp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MzQ1OTgsImV4cCI6MjA2NzMxMDU5OH0.CqDTiPYDmaLouY5EdQHXXTTqZ233RPaa8G8jFFKSZ4g'
+    );
+
+    function getRandomGradient() {
+      const gradients = [
+        'from-pink-500 via-red-500 to-yellow-500',
+        'from-indigo-500 via-purple-500 to-pink-500',
+        'from-green-400 via-blue-500 to-indigo-600',
+        'from-yellow-400 via-red-500 to-pink-500',
+        'from-blue-500 via-teal-500 to-green-400'
+      ];
+      return gradients[Math.floor(Math.random() * gradients.length)];
+    }
+
+    function calculateXPPercent(xp, level) {
+      const xpToNext = 100 + level * 20;
+      return Math.min(100, (xp / xpToNext) * 100);
+    }
+
+    async function loadUserData() {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) return;
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (!userData) return;
+
+      const username = userData.username || 'Anonymous';
+      const initial = username.charAt(0).toUpperCase();
+      const level = userData.level || 0;
+      const xp = userData.xp || 0;
+
+      const avatar = document.getElementById('avatar');
+      avatar.textContent = initial;
+
+      let gradient = sessionStorage.getItem('userGradient');
+      if (!gradient) {
+        gradient = getRandomGradient();
+        sessionStorage.setItem('userGradient', gradient);
+      }
+      avatar.classList.add('bg-gradient-to-br', ...gradient.split(' '));
+
+      document.getElementById('username').textContent = username;
+      document.getElementById('email').textContent = user.email;
+      document.getElementById('xp').textContent = xp;
+      document.getElementById('level').textContent = level;
+      document.getElementById('gems').textContent = userData.gems || 0;
+      document.getElementById('hearts').textContent = userData.hearts || 0;
+      document.getElementById('streak').textContent = userData.streak || 0;
+
+      const xpToNext = 100 + level * 20;
+      const percent = calculateXPPercent(xp, level);
+      document.getElementById('progress-bar').style.width = percent + '%';
+      document.getElementById('xp-label').textContent = `${xp} / ${xpToNext} XP`;
+    }
+
+    loadUserData();
+  </script>
 </body>
 
 </html>
