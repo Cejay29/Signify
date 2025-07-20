@@ -15,20 +15,18 @@
         class="fixed z-50 top-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-xl text-center text-white text-base font-semibold bg-red-500 opacity-0 transition-opacity duration-500 pointer-events-none">
     </div>
 
-    <!-- Background Shapes -->
-    <img src="/bg/shape-bottom-kanan.png"
-        class="absolute bottom-0 right-0 w-[350px] opacity-20 pointer-events-none" alt="">
-    <img src="/bg/shape-bottom-left.png"
-        class="absolute bottom-0 left-0 w-[400px] opacity-80 pointer-events-none" alt="">
-    <img src="/bg/shape-top-left.png" class="absolute top-0 left-0 w-[350px] pointer-events-none" alt="">
-    <img src="/bg/shape-top-right.png" class="absolute top-0 right-0 w-[350px] pointer-events-none" alt="">
-    <img src="/bg/shape-center.png"
-        class="absolute top-[210px] left-[35%] w-[500px] rotate-[-10deg] pointer-events-none" alt="">
-    <img src="/bg/shape-center-bot.png"
-        class="absolute -bottom-[130px] left-[35%] w-[500px] pointer-events-none" alt="">
+    <!-- Background Wrapper -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <img src="/bg/shape-bottom-kanan.png" class="absolute bottom-0 right-0 w-[350px] opacity-20" alt="">
+        <img src="/bg/shape-bottom-left.png" class="absolute bottom-0 left-0 w-[400px] opacity-80" alt="">
+        <img src="/bg/shape-top-left.png" class="absolute top-0 left-0 w-[350px]" alt="">
+        <img src="/bg/shape-top-right.png" class="absolute top-0 right-0 w-[350px]" alt="">
+        <img src="/bg/shape-center.png" class="absolute top-[210px] left-[35%] w-[500px] rotate-[-10deg]" alt="">
+        <img src="/bg/shape-center-bot.png" class="absolute bottom-0 left-[35%] w-[500px]" alt="">
+    </div>
 
     <!-- Close Button -->
-    <button onclick="window.location.href='landing.html'" class="fixed top-5 left-5 text-white text-2xl z-50">✕</button>
+    <button onclick="window.location.href='landing.html'" class="fixed top-5 left-5 text-black text-3xl z-50">✕</button>
 
     <!-- Sign Up Form -->
     <div class="z-10 text-white w-full px-4">

@@ -119,6 +119,19 @@
   <!-- Lesson Content -->
   <div id="lesson-container" class="pt-32 px-6 max-w-6xl mx-auto transition-all duration-300"></div>
 
+  <!-- Exit Confirmation Modal -->
+  <div id="exitModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-[#24243A] rounded-xl p-6 w-80 text-center">
+      <h2 class="text-xl font-bold mb-4 text-white">Exit Lesson?</h2>
+      <p class="mb-6 text-gray-300 text-sm">Your progress may not be saved.</p>
+      <div class="flex justify-center gap-4">
+        <button onclick="cancelExit()"
+          class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Cancel</button>
+        <button onclick="exitLesson()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Exit</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Inside your <script> tag in lesson.html -->
   <script>
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -143,22 +156,26 @@
     }
 
     async function fetchLessonData(lessonId) {
-      const { data, error } = await supabase
-        .from('lesson')
-        .select('xp_reward, gems_reward')
-        .eq('id', lessonId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('lesson')
+          .select('xp_reward,gem_reward')
+          .eq('id', lessonId)
+          .single();
 
-      if (error) {
-        console.error("Error fetching lesson rewards:", error);
-      } else {
-        lessonXPReward = data.xp_reward || 0;
-        lessonGemsReward = data.gems_reward || 0;
+        if (error) throw error;
+
+        const lesson = data;
+        lessonXPReward = lesson.xp_reward;
+        lessonGemsReward = lesson.gem_reward;
+      } catch (error) {
+        console.error('Error fetching lesson rewards:', error);
       }
     }
 
     async function fetchLessonContent() {
       await loadGestureModel();
+      await fetchLessonData(lessonId);
       const { data: lessonSigns } = await supabase.from("lesson_signs").select("*").eq("lesson_id", lessonId).order("order");
       const { data: lessonQuestions } = await supabase.from("lesson_questions").select("*").eq("lesson_id", lessonId);
       if (!lessonSigns || !lessonQuestions) return;
@@ -252,6 +269,12 @@
     function renderStep() {
       stopWebcam();
       const container = document.getElementById("lesson-container");
+      function extractYouTubeID(url) {
+        const regExp = /^.*(youtu.be\/|v=|embed\/)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return match && match[2].length === 11 ? match[2] : null;
+      }
+
       if (stepIndex >= steps.length) {
         rewardPlayer(lessonId);
 
@@ -277,7 +300,15 @@
         <div class="flex flex-col md:flex-row gap-10 items-center">
           <div class="w-full md:w-1/2 bg-[#24243A] p-6 rounded-xl">
             <h2 class="text-3xl font-bold text-[#FFC400] mb-4">${title}</h2>
-            ${isSign ? `<video src="${video_url}" controls class="w-full rounded mb-4 max-h-64"></video><p>${description}</p>` : ""}
+           ${isSign
+            ? `
+                  ${video_url.includes("youtube.com") || video_url.includes("youtu.be")
+              ? `<iframe src="https://www.youtube.com/embed/${extractYouTubeID(video_url)}" class="w-full rounded mb-4 max-h-64 aspect-video" frameborder="0" allowfullscreen></iframe>`
+              : `<video src="${video_url}" controls class="w-full rounded mb-4 max-h-64"></video>`
+            }
+                  <p>${description}</p>`
+            : ""
+          }
           </div>
           <div class="w-full md:w-1/2 text-center">
             <video id="webcam" autoplay playsinline class="rounded-xl border border-gray-500 w-full aspect-video"></video>
@@ -287,6 +318,7 @@
         </div>`;
 
         initWebcam();
+        setupMediaPipe();
 
         setTimeout(() => {
           const btn = document.getElementById("tryGestureBtn");
@@ -406,19 +438,15 @@
     }
 
     function onResults(results) {
-      try {
-        if (!gestureCallback || !results.multiHandLandmarks || !model) return;
-        const raw = results.multiHandLandmarks[0];
-        const input = normalize(raw);
-        if (!input) return;
-        const prediction = model.predict(tf.tensor([input]));
-        prediction.array().then(arr => {
-          const maxIdx = arr[0].indexOf(Math.max(...arr[0]));
-          predictionBuffer.push(gestureLabels[maxIdx]);
-        });
-      } catch (err) {
-        console.error("Gesture prediction error:", err);
-      }
+      if (!gestureCallback || !results.multiHandLandmarks || !model) return;
+      const raw = results.multiHandLandmarks[0];
+      const input = normalize(raw);
+      if (!input) return;
+      const prediction = model.predict(tf.tensor([input]));
+      prediction.array().then(arr => {
+        const maxIdx = arr[0].indexOf(Math.max(...arr[0]));
+        predictionBuffer.push(gestureLabels[maxIdx]);
+      });
     }
 
     function evaluateGesturePrediction() {
@@ -430,18 +458,11 @@
       gestureCallback = null;
     }
 
-    let mediaPipeInitialized = false;
-
     function initWebcam() {
       const video = document.getElementById("webcam");
       if (!video) return;
       navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-        webcamStream = stream;
-        video.srcObject = stream;
-        if (!mediaPipeInitialized) {
-          setupMediaPipe();
-          mediaPipeInitialized = true;
-        }
+        webcamStream = stream; video.srcObject = stream;
       }).catch(err => console.error("Webcam error", err));
     }
 
@@ -453,7 +474,7 @@
       const video = document.getElementById("webcam");
       if (!video) return;
       hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
-      hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
+      hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
       hands.onResults(onResults);
       camera = new Camera(video, {
         onFrame: async () => {
@@ -471,10 +492,16 @@
     }
 
     function confirmExit() {
-      if (confirm("Exit this lesson? Progress may not be saved.")) {
-        stopWebcam();
-        window.location.href = "homepage.html";
-      }
+      document.getElementById("exitModal").classList.remove("hidden");
+    }
+
+    function cancelExit() {
+      document.getElementById("exitModal").classList.add("hidden");
+    }
+
+    function exitLesson() {
+      stopWebcam();
+      window.location.href = "homepage.html";
     }
 
     async function fetchHearts() {

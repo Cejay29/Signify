@@ -22,16 +22,16 @@
 </head>
 
 <body class="bg-[#0E0A3A] min-h-screen flex items-center justify-center relative font-[Inter]">
-    <!-- Background Shapes -->
-    <img src="/bg/shape-bottom-kanan.png" class="absolute bottom-0 right-0 w-[350px] opacity-20 pointer-events-none"
-        alt="">
-    <img src="/bg/shape-bottom-left.png" class="absolute bottom-0 left-0 w-[400px] opacity-80 pointer-events-none">
-    <img src="/bg/shape-top-left.png" class="absolute top-0 left-0 w-[350px] pointer-events-none" alt="">
-    <img src="/bg/shape-top-right.png" class="absolute top-0 right-0 w-[350px] pointer-events-none" alt="">
-    <img src="/bg/shape-center.png" class="absolute top-[210px] left-[35%] w-[500px] rotate-[-10deg] pointer-events-none"
-        alt="">
-    <img src="/bg/shape-center-bot.png"
-        class="absolute -bottom-[130px] left-[35%] w-[500px] opacity-100 pointer-events-none" alt="">
+    
+    <!-- Background Wrapper -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <img src="/bg/shape-bottom-kanan.png" class="absolute bottom-0 right-0 w-[350px] opacity-20" alt="">
+        <img src="/bg/shape-bottom-left.png" class="absolute bottom-0 left-0 w-[400px] opacity-80" alt="">
+        <img src="/bg/shape-top-left.png" class="absolute top-0 left-0 w-[350px]" alt="">
+        <img src="/bg/shape-top-right.png" class="absolute top-0 right-0 w-[350px]" alt="">
+        <img src="/bg/shape-center.png" class="absolute top-[210px] left-[35%] w-[500px] rotate-[-10deg]" alt="">
+        <img src="/bg/shape-center-bot.png" class="absolute bottom-0 left-[35%] w-[500px]" alt="">
+    </div>
 
     <!-- Toast Notification -->
     <div id="toast"
@@ -39,7 +39,7 @@
     </div>
 
     <!-- Close Button -->
-    <button onclick="window.location.href='landing.html'" class="fixed top-5 left-5 text-white text-3xl z-50">✕</button>
+    <button onclick="window.location.href='landing.html'" class="fixed top-5 left-5 text-black text-3xl z-50">✕</button>
 
     <!-- Login Box -->
     <div class="z-10 text-white w-full px-4">

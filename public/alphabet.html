@@ -15,14 +15,17 @@
         opacity: 0;
         transform: translateY(20px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
+
     .animate-fade-in-up {
       animation: fadeInUp 0.5s ease-out both;
     }
+
     .nav-btn {
       display: flex;
       align-items: center;
@@ -34,10 +37,12 @@
       background: transparent;
       transition: background 0.2s;
     }
+
     .nav-btn:hover,
     .nav-btn.active {
       background: rgba(255, 255, 255, 0.08);
     }
+
     .nav-icon {
       width: 36px;
       height: 36px;
@@ -49,48 +54,99 @@
 <body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] font-inter">
   <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
     <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
-    <nav class="flex flex-col gap-4 mt-4">
-      <button class="nav-btn" onclick="window.location.href='homepage.html'"><img src="img/learn.png" class="nav-icon"> LEARN</button>
-      <button class="nav-btn active"><img src="img/letter.png" class="nav-icon"> ALPHABET & MORE</button>
-      <button class="nav-btn" onclick="window.location.href='shop.html'"><img src="img/shop.png" class="nav-icon"> SHOP</button>
-      <button class="nav-btn" onclick="window.location.href='profile.html'"><img src="img/profile.png" class="nav-icon"> PROFILE</button>
-      <button class="nav-btn"><img src="img/more.png" class="nav-icon"> MORE</button>
+    <nav class="flex flex-col gap-3 mt-4">
+      <button class="nav-btn" onclick="window.location.href='homepage.html'">
+        <img src="img/learn.png" class="nav-icon"> LEARN
+      </button>
+      <button class="nav-btn active">
+        <img src="img/letter.png" class="nav-icon"> ALPHABET & MORE
+      </button>
+      <button class="nav-btn" onclick="window.location.href='shop.html'">
+        <img src="img/shop.png" class="nav-icon"> SHOP
+      </button>
+      <button class="nav-btn" onclick="window.location.href='profile.html'">
+        <img src="img/profile.png" class="nav-icon"> PROFILE
+      </button>
+
+      <!-- More Button with Dropdown -->
+      <div class="relative">
+        <button id="moreBtn" class="nav-btn w-full justify-between pr-4">
+          <div class="flex items-center gap-3">
+            <img src="img/more.png" class="nav-icon" />
+            <span>MORE</span>
+          </div>
+          <svg id="chevron" class="w-4 h-4 transition-transform duration-200 text-white" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <!-- Dropdown Content -->
+        <div id="moreDropdown" class="hidden ml-12 mt-1 space-y-1">
+          <button onclick="window.location.href='/landing.html'" class="nav-btn text-red-400 hover:bg-[#3a3a55]">
+            LOGOUT
+          </button>
+        </div>
+      </div>
     </nav>
   </aside>
 
   <main class="flex-1 overflow-y-auto px-6 pb-12">
-    <header class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
-      <div class="flex items-center gap-2 tooltip"><img src="img/flag.png" class="w-7 h-7 rounded-full border-2 border-white" alt="Language"></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse" alt="Streak"><span class="streak-value font-bold">0</span></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span class="gems-value font-bold">0</span></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="img/heart.png" class="w-7 h-7" alt="Hearts"><span class="hearts-value font-bold">0</span></div>
+    <header
+      class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
+      <div class="flex items-center gap-2 tooltip"><img src="img/flag.png"
+          class="w-7 h-7 rounded-full border-2 border-white" alt="Language"></div>
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse"
+          alt="Streak"><span class="streak-value font-bold">0</span></div>
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span
+          class="gems-value font-bold">0</span></div>
+      <div class="flex items-center gap-2 tooltip text-white"><img src="img/heart.png" class="w-7 h-7"
+          alt="Hearts"><span class="hearts-value font-bold">0</span></div>
     </header>
 
     <section class="pt-40">
       <div class="flex justify-center gap-10 border-b border-gray-700 pb-4">
-        <div class="tab cursor-pointer text-white font-bold uppercase px-4 py-2 border-b-4 border-[#C5CAFF] transition-all duration-300" onclick="switchTab('alphabet')">Alphabet</div>
-        <div class="tab cursor-pointer text-gray-400 hover:text-white px-4 py-2 transition-all duration-300" onclick="switchTab('numbers')">Numbers</div>
-        <div class="tab cursor-pointer text-gray-400 hover:text-white px-4 py-2 transition-all duration-300" onclick="switchTab('words')">Words</div>
+        <div
+          class="tab cursor-pointer text-white font-bold uppercase px-4 py-2 border-b-4 border-[#C5CAFF] transition-all duration-300"
+          onclick="switchTab('alphabet')">Alphabet</div>
+        <div class="tab cursor-pointer text-gray-400 hover:text-white px-4 py-2 transition-all duration-300"
+          onclick="switchTab('numbers')">Numbers</div>
+        <div class="tab cursor-pointer text-gray-400 hover:text-white px-4 py-2 transition-all duration-300"
+          onclick="switchTab('words')">Words</div>
       </div>
 
       <div id="alphabet" class="tab-content grid grid-cols-4 md:grid-cols-6 gap-6 mt-10 justify-items-center"></div>
-      <div id="numbers" class="tab-content hidden grid grid-cols-5 md:grid-cols-10 gap-6 mt-10 justify-items-center"></div>
+      <div id="numbers" class="tab-content hidden grid grid-cols-5 md:grid-cols-10 gap-6 mt-10 justify-items-center">
+      </div>
       <div id="words" class="tab-content hidden grid grid-cols-2 md:grid-cols-4 gap-6 mt-10 justify-items-center"></div>
     </section>
   </main>
 
   <div id="letterModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
     <div class="bg-[#2a2a3c] p-6 rounded-lg text-center text-white max-w-sm w-full relative animate-fade-in-up">
-      <button class="absolute top-2 right-4 text-2xl font-bold hover:text-[#FFC400]" onclick="toggleModal(false)">&times;</button>
+      <button class="absolute top-2 right-4 text-2xl font-bold hover:text-[#FFC400]"
+        onclick="toggleModal(false)">&times;</button>
       <img id="modal-img" src="" class="w-full mb-4 rounded">
       <p id="modal-letter" class="text-3xl font-bold text-[#FFC400]"></p>
     </div>
   </div>
 
   <script>
+
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
     const words = ['hello', 'thankyou', 'please', 'goodbye'];
+
+    const moreBtn = document.getElementById('moreBtn');
+    const moreDropdown = document.getElementById('moreDropdown');
+    const chevron = document.getElementById('chevron');
+
+    if (moreBtn && moreDropdown && chevron) {
+      moreBtn.addEventListener('click', () => {
+        moreDropdown.classList.toggle('hidden');
+        chevron.classList.toggle('rotate-180');
+      });
+    }
 
     function createCard(src, label) {
       return `<div class="bg-[#2a2a3c] p-4 rounded-lg text-center cursor-pointer hover:scale-105 hover:bg-[#383857] transition-transform duration-200 animate-fade-in-up" onclick="openModal('${src}', '${label}')">
