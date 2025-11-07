@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users | Signify Admin</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script type="module">
+    import { supabase } from "./js/supabaseClient.js";
+
+    lucide.createIcons();
+
+    const userTableBody = document.getElementById("userTableBody");
+    const modal = document.getElementById("modal");
+    const modalForm = document.getElementById("modalForm");
+    const modalTitle = document.getElementById("modalTitle");
+
+    let editingUser = null;
+
+    // 🧩 Load all users
+    async function loadUsers() {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, username, email, xp, gems, hearts, streak");
+
+      if (error) {
+        console.error("Error loading users:", error);
+        return;
+      }
+
+      userTableBody.innerHTML = data
+        .map(
+          (user, i) => `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3">${i + 1}</td>
+            <td class="p-3 font-semibold">${user.username}</td>
+            <td class="p-3">${user.email}</td>
+            <td class="p-3">${user.xp}</td>
+            <td class="p-3">${user.gems}</td>
+            <td class="p-3">${user.hearts}</td>
+            <td class="p-3">${user.streak}</td>
+            <td class="p-3 flex gap-2">
+              <button onclick="openEditModal('${user.id}', '${user.username}', '${user.email}', ${user.xp || 0}, ${user.gems || 0}, ${user.hearts || 0}, ${user.streak || 0})" class="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                <i data-lucide='edit' class='w-4 h-4'></i>Edit
+              </button>
+              <button onclick="deleteUser('${user.id}')" class="text-red-600 hover:text-red-800 flex items-center gap-1">
+                <i data-lucide='trash' class='w-4 h-4'></i>Delete
+              </button>
+            </td>
+          </tr>`
+        )
+        .join("");
+
+      lucide.createIcons();
+    }
+
+    // 🆕 Open Add User Modal
+    window.openAddModal = () => {
+      editingUser = null;
+      modalTitle.textContent = "Add User";
+      modalForm.reset();
+      modal.classList.remove("hidden");
+    };
+
+    // ✏️ Open Edit User Modal
+    window.openEditModal = (id, username, email, xp, gems, hearts, streak) => {
+      editingUser = id;
+      modalTitle.textContent = "Edit User";
+      document.getElementById("username").value = username;
+      document.getElementById("email").value = email;
+      document.getElementById("xp").value = xp;
+      document.getElementById("gems").value = gems;
+      document.getElementById("hearts").value = hearts;
+      document.getElementById("streak").value = streak;
+      modal.classList.remove("hidden");
+    };
+
+    // 💾 Save (Add/Edit)
+    modalForm.onsubmit = async (e) => {
+      e.preventDefault();
+
+      const userData = {
+        username: document.getElementById("username").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        xp: Number(document.getElementById("xp").value) || 0,
+        gems: Number(document.getElementById("gems").value) || 0,
+        hearts: Number(document.getElementById("hearts").value) || 0,
+        streak: Number(document.getElementById("streak").value) || 0,
+      };
+
+      if (editingUser) {
+        const { error } = await supabase.from("users").update(userData).eq("id", editingUser);
+        if (error) console.error("Error updating user:", error);
+      } else {
+        const { error } = await supabase.from("users").insert([userData]);
+        if (error) console.error("Error adding user:", error);
+      }
+
+      modal.classList.add("hidden");
+      loadUsers();
+    };
+
+    // 🗑 Delete user
+    window.deleteUser = async (id) => {
+      if (!confirm("Delete this user?")) return;
+      const { error } = await supabase.from("users").delete().eq("id", id);
+      if (error) console.error("Error deleting user:", error);
+      else loadUsers();
+    };
+
+    // ❌ Close modal
+    window.closeModal = () => modal.classList.add("hidden");
+
+    // 🚪 Logout function
+    window.logout = async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        alert("Logout failed. Please try again.");
+        console.error(error);
+      } else {
+        window.location.href = "login.html"; // change this to your login page
+      }
+    };
+
+    loadUsers();
+  </script>
+</head>
+
+<body class="bg-gray-100 flex min-h-screen text-gray-800">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-lg flex flex-col">
+    <div class="p-6 border-b flex items-center gap-2">
+      <i data-lucide="brain" class="w-6 h-6 text-indigo-600"></i>
+      <h1 class="text-2xl font-bold text-indigo-600">Signify Admin</h1>
+    </div>
+    <nav class="flex-1 p-4 space-y-2 text-gray-700">
+      <a href="admin.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="home" class="w-5 h-5"></i> Dashboard
+      </a>
+      <a href="lessons.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="book-open" class="w-5 h-5"></i> Manage Lessons
+      </a>
+      <a href="gestures.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="hand" class="w-5 h-5"></i> Gestures
+      </a>
+      <a href="users.html" class="flex items-center gap-2 p-2 rounded bg-indigo-100 text-indigo-600 font-semibold">
+        <i data-lucide="users" class="w-5 h-5"></i> Users
+      </a>
+    </nav>
+
+    <!-- Logout Button -->
+    <div class="p-4 border-t">
+      <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded transition">
+        <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+        <i data-lucide="users" class="w-7 h-7 text-indigo-600"></i>
+        User Management
+      </h2>
+
+      <button onclick="openAddModal()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
+        <i data-lucide="user-plus" class="w-5 h-5"></i> Add User
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full text-sm text-left">
+        <thead class="bg-indigo-50 text-indigo-700">
+          <tr>
+            <th class="p-3">#</th>
+            <th class="p-3">Username</th>
+            <th class="p-3">Email</th>
+            <th class="p-3">XP</th>
+            <th class="p-3">Gems</th>
+            <th class="p-3">Hearts</th>
+            <th class="p-3">Streak</th>
+            <th class="p-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+      <h3 id="modalTitle" class="text-xl font-bold mb-4">Add User</h3>
+      <form id="modalForm" class="space-y-3">
+        <div>
+          <label class="text-sm">Username</label>
+          <input id="username" type="text" class="w-full border rounded p-2" required />
+        </div>
+        <div>
+          <label class="text-sm">Email</label>
+          <input id="email" type="email" class="w-full border rounded p-2" required />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm">XP</label>
+            <input id="xp" type="number" class="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label class="text-sm">Gems</label>
+            <input id="gems" type="number" class="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label class="text-sm">Hearts</label>
+            <input id="hearts" type="number" class="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label class="text-sm">Streak</label>
+            <input id="streak" type="number" class="w-full border rounded p-2" />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

@@ -4,59 +4,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile</title>
+  <title>Profile | Signify</title>
+
+  <!-- Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
   <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
     .nav-btn {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
+      justify-content: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
       font-weight: 600;
       color: white;
       border-radius: 8px;
-      background: transparent;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.2s;
+      width: 100%;
+      text-align: left;
     }
 
     .nav-btn:hover,
     .nav-btn.active {
       background: rgba(255, 255, 255, 0.08);
+      transform: translateX(4px);
     }
 
-    .nav-icon {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
+    #avatar {
+      transition: all 0.3s ease;
+    }
+
+    #avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255, 196, 0, 0.4);
+    }
+
+    .progress-bar {
+      transition: width 0.5s ease;
     }
   </style>
 </head>
 
-<body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] font-inter">
+<body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] text-white">
+
   <!-- Sidebar -->
   <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
     <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
     <nav class="flex flex-col gap-3 mt-4">
       <button class="nav-btn" onclick="window.location.href='homepage.html'">
-        <img src="img/learn.png" class="nav-icon"> LEARN
+        <i data-lucide='book-open' class='w-5 h-5'></i> LEARN
       </button>
       <button class="nav-btn" onclick="window.location.href='alphabet.html'">
-        <img src="img/letter.png" class="nav-icon"> ALPHABET & MORE
+        <i data-lucide='type' class='w-5 h-5'></i> ALPHABET & MORE
       </button>
       <button class="nav-btn" onclick="window.location.href='shop.html'">
-        <img src="img/shop.png" class="nav-icon"> SHOP
+        <i data-lucide='shopping-bag' class='w-5 h-5'></i> SHOP
       </button>
       <button class="nav-btn active">
-        <img src="img/profile.png" class="nav-icon"> PROFILE
+        <i data-lucide='user' class='w-5 h-5'></i> PROFILE
       </button>
 
-      <!-- More Button with Dropdown -->
       <div class="relative">
         <button id="moreBtn" class="nav-btn w-full justify-between pr-4">
-          <div class="flex items-center gap-3">
-            <img src="img/more.png" class="nav-icon" />
+          <div class="flex items-center gap-2">
+            <i data-lucide="more-horizontal" class="w-5 h-5"></i>
             <span>MORE</span>
           </div>
           <svg id="chevron" class="w-4 h-4 transition-transform duration-200 text-white" fill="none"
@@ -65,66 +83,77 @@
           </svg>
         </button>
 
-        <!-- Dropdown Content -->
         <div id="moreDropdown" class="hidden ml-12 mt-1 space-y-1">
-          <button onclick="window.location.href='/landing.html'" class="nav-btn text-red-400 hover:bg-[#3a3a55]">
-            LOGOUT
+          <button onclick="logout()" class="nav-btn text-red-400 hover:bg-[#3a3a55]">
+            <i data-lucide="log-out" class="w-5 h-5"></i> LOGOUT
           </button>
         </div>
       </div>
     </nav>
   </aside>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <main class="flex-1 overflow-y-auto px-8 pb-12">
+    <!-- Header Stats -->
     <header
       class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
-      <div class="flex items-center gap-2"><img src="img/flag.png" class="w-7 h-7 rounded-full border-2 border-white"
-          alt="Language"></div>
-      <div class="flex items-center gap-2 text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse"
-          alt="Streak"><span class="font-bold" id="streak">0</span></div>
-      <div class="flex items-center gap-2 text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span
-          class="font-bold" id="gems">0</span></div>
-      <div class="flex items-center gap-2 text-white"><img src="img/heart.png" class="w-7 h-7" alt="Hearts"><span
-          class="font-bold" id="hearts">0</span></div>
+      <div class="flex items-center gap-2 text-white">
+        <img src="img/fire.png" class="w-7 h-7 animate-pulse" alt="Streak">
+        <span id="streak" class="font-bold">0</span>
+      </div>
+      <div class="flex items-center gap-2 text-white">
+        <img src="img/gem.png" class="w-7 h-7" alt="Gems">
+        <span id="gems" class="font-bold">0</span>
+      </div>
+      <div class="flex items-center gap-2 text-white">
+        <img src="img/heart.png" class="w-7 h-7" alt="Hearts">
+        <span id="hearts" class="font-bold">0</span>
+      </div>
     </header>
 
+    <!-- Profile Section -->
     <section class="pt-40 max-w-4xl mx-auto text-white">
       <!-- User Info -->
       <div class="flex items-center gap-6 mb-6">
         <div id="avatar"
-          class="w-28 h-28 flex items-center justify-center text-3xl font-bold rounded-full border-4 text-white shadow-xl">
+          class="w-28 h-28 flex items-center justify-center text-3xl font-bold rounded-full border-4 text-white shadow-xl bg-gradient-to-br from-[#FFC400] to-[#FF8C00]">
           A
         </div>
         <div>
-          <h2 class="text-3xl font-bold" id="username">Loading...</h2>
-          <p class="text-gray-400" id="email">Loading...</p>
-          </p>
+          <h2 id="username" class="text-3xl font-bold mb-1">Loading...</h2>
+          <p id="email" class="text-gray-400">Loading...</p>
         </div>
       </div>
 
-      <hr class="border-gray-600 mb-6">
+      <hr class="border-gray-700 mb-8">
 
-      <!-- Progress -->
-      <div class="mb-6">
-        <h3 class="text-2xl font-semibold mb-2">Your Progress</h3>
-        <div class="bg-[#2a2a3c] p-4 rounded-lg">
+      <!-- XP Progress -->
+      <div class="mb-8">
+        <h3 class="text-2xl font-semibold mb-3 flex items-center gap-2">
+          <i data-lucide="star" class="w-6 h-6 text-[#FFC400]"></i> Your Progress
+        </h3>
+        <div class="bg-[#2A2A3C] p-5 rounded-xl shadow-inner border border-[#3a3a55]">
           <div class="w-full bg-[#1C1B2E] rounded-full h-4 overflow-hidden">
-            <div id="progress-bar" class="h-4 bg-gradient-to-r from-[#FFC400] to-[#FF6B00] rounded-full transition-all"
-              style="width: 0%"></div>
+            <div id="progress-bar"
+              class="progress-bar h-4 bg-gradient-to-r from-[#FFC400] to-[#FF6B00] rounded-full transition-all"
+              style="width: 0%">
+            </div>
           </div>
           <div class="flex justify-between text-sm text-gray-400 mt-1">
             <span id="current-level-label">Lvl 0</span>
             <span id="next-level-label">Lvl 1</span>
           </div>
-          <p class="text-sm text-gray-400 mt-1 text-right" id="xp-label">0 / 100 XP</p>
+          <p id="xp-label" class="text-sm text-gray-400 mt-1 text-right">0 / 100 XP</p>
         </div>
       </div>
 
       <!-- Achievements -->
       <div>
-        <h3 class="text-2xl font-semibold mb-2">Achievements</h3>
-        <div class="h-24 bg-[#2a2a3c] rounded-lg flex items-center justify-center text-gray-400">
+        <h3 class="text-2xl font-semibold mb-3 flex items-center gap-2">
+          <i data-lucide="trophy" class="w-6 h-6 text-yellow-400"></i> Achievements
+        </h3>
+        <div
+          class="bg-[#2a2a3c] rounded-xl py-10 flex items-center justify-center text-gray-400 border border-[#3a3a55]">
           Coming Soon
         </div>
       </div>
@@ -132,20 +161,21 @@
   </main>
 
   <script>
-    const moreBtn = document.getElementById('moreBtn');
-    const moreDropdown = document.getElementById('moreDropdown');
-    const chevron = document.getElementById('chevron');
+    lucide.createIcons();
 
-    if (moreBtn && moreDropdown && chevron) {
-      moreBtn.addEventListener('click', () => {
-        moreDropdown.classList.toggle('hidden');
-        chevron.classList.toggle('rotate-180');
-      });
-    }
     const supabase = window.supabase.createClient(
       'https://lxetbblytlvihitapazv.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4ZXRiYmx5dGx2aWhpdGFwYXp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MzQ1OTgsImV4cCI6MjA2NzMxMDU5OH0.CqDTiPYDmaLouY5EdQHXXTTqZ233RPaa8G8jFFKSZ4g'
     );
+
+    const moreBtn = document.getElementById('moreBtn');
+    const moreDropdown = document.getElementById('moreDropdown');
+    const chevron = document.getElementById('chevron');
+
+    moreBtn.addEventListener('click', () => {
+      moreDropdown.classList.toggle('hidden');
+      chevron.classList.toggle('rotate-180');
+    });
 
     function getRandomGradient() {
       const gradients = [
@@ -192,8 +222,8 @@
 
       document.getElementById('username').textContent = username;
       document.getElementById('email').textContent = user.email;
-      document.getElementById('current-level-label').textContent = `Lvl ${level}`;
-      document.getElementById('next-level-label').textContent = `Lvl ${level + 1}`;
+      document.getElementById('current-level-label').textContent = 'Lvl ' + level;
+      document.getElementById('next-level-label').textContent = 'Lvl ' + (level + 1);
       document.getElementById('gems').textContent = userData.gems || 0;
       document.getElementById('hearts').textContent = userData.hearts || 0;
       document.getElementById('streak').textContent = userData.streak || 0;
@@ -201,7 +231,11 @@
       const xpToNext = 100 + level * 20;
       const percent = calculateXPPercent(xp, level);
       document.getElementById('progress-bar').style.width = percent + '%';
-      document.getElementById('xp-label').textContent = `${xp} / ${xpToNext} XP`;
+      document.getElementById('xp-label').textContent = xp + ' / ' + xpToNext + ' XP';
+    }
+
+    function logout() {
+      supabase.auth.signOut().then(() => window.location.href = "landing.html");
     }
 
     loadUserData();

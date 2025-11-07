@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Management | Signify Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="flex min-h-screen bg-gray-50 text-gray-800">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-lg flex flex-col">
+    <div class="p-6 border-b">
+      <h1 class="text-2xl font-bold text-indigo-600">Signify Admin</h1>
+    </div>
+    <nav class="flex-1 p-4 space-y-2 text-gray-700">
+      <a href="admin.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="home" class="w-5 h-5"></i> Dashboard
+      </a>
+      <a href="lessons.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="book-open" class="w-5 h-5"></i> Manage Lessons
+      </a>
+      <a href="gestures.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="hand" class="w-5 h-5"></i> Gestures
+      </a>
+      <a href="models.html" class="flex items-center gap-2 p-2 rounded bg-indigo-100 text-indigo-600 font-semibold">
+        <i data-lucide="brain-circuit" class="w-5 h-5"></i> Model Management
+      </a>
+      <a href="users.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="users" class="w-5 h-5"></i> Users
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+        <i data-lucide="brain-circuit" class="w-7 h-7 text-indigo-600"></i>
+        Model Management
+      </h2>
+      <button id="trainBtn"
+        class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow">
+        <i data-lucide="rocket" class="w-5 h-5"></i> Train New Model
+      </button>
+    </div>
+
+    <div id="statusMsg" class="text-sm text-gray-500 mb-4"></div>
+
+    <!-- Chart -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+      <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <i data-lucide="activity" class="w-5 h-5 text-indigo-500"></i> Accuracy Over Time
+      </h3>
+      <canvas id="accuracyChart" height="100"></canvas>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <table class="w-full border-collapse text-sm">
+        <thead class="bg-gray-100 text-gray-600 uppercase">
+          <tr>
+            <th class="text-left px-4 py-3">Version</th>
+            <th class="text-left px-4 py-3">Accuracy</th>
+            <th class="text-left px-4 py-3">Uploaded</th>
+            <th class="text-left px-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="modelTable" class="divide-y divide-gray-100 text-gray-700"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script type="module">
+    import { supabase } from "./js/supabaseClient.js";
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      lucide.createIcons();
+      loadModels();
+    });
+
+    async function loadModels() {
+      const table = document.getElementById("modelTable");
+      const status = document.getElementById("statusMsg");
+
+      status.textContent = "⏳ Loading model versions...";
+
+      const { data, error } = await supabase
+        .from("model_versions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error(error);
+        status.textContent = "❌ Error loading models.";
+        return;
+      }
+
+      if (!data.length) {
+        table.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-500">No models found</td></tr>`;
+        status.textContent = "";
+        return;
+      }
+
+      table.innerHTML = data
+        .map(
+          (m) => `
+        <tr>
+          <td class="px-4 py-3 font-medium">${m.version}</td>
+          <td class="px-4 py-3">${m.accuracy ? m.accuracy + "%" : "N/A"}</td>
+          <td class="px-4 py-3">${new Date(m.created_at).toLocaleString()}</td>
+          <td class="px-4 py-3">
+            <a href="${m.file_path}" target="_blank" class="text-indigo-600 hover:underline">View</a>
+          </td>
+        </tr>`
+        )
+        .join("");
+
+      status.textContent = "✅ Loaded model versions.";
+      renderChart(data);
+    }
+
+    // 📈 Accuracy chart
+    function renderChart(models) {
+      const ctx = document.getElementById("accuracyChart").getContext("2d");
+
+      const sorted = [...models].sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+      );
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: sorted.map((m) =>
+            new Date(m.created_at).toLocaleString()
+          ),
+          datasets: [
+            {
+              label: "Accuracy (%)",
+              data: sorted.map((m) => m.accuracy || 0),
+              borderColor: "#4f46e5",
+              backgroundColor: "rgba(79,70,229,0.2)",
+              borderWidth: 3,
+              tension: 0.3,
+              fill: true,
+              yAxisID: 'y1',
+            },
+            {
+              label: "Loss",
+              data: sorted.map((m) => m.loss || 0),
+              borderColor: "#dc2626",
+              backgroundColor: "rgba(220,38,38,0.2)",
+              borderWidth: 3,
+              tension: 0.3,
+              fill: true,
+              yAxisID: 'y2',
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y1: {
+              type: 'linear',
+              position: 'left',
+              beginAtZero: true,
+              max: 100,
+              title: { display: true, text: "Accuracy (%)" },
+            },
+            y2: {
+              type: 'linear',
+              position: 'right',
+              beginAtZero: true,
+              title: { display: true, text: "Loss" },
+              grid: { drawOnChartArea: false },
+            },
+          },
+        },
+      });
+    }
+
+    // 🧠 Train model button
+    document.getElementById("trainBtn").addEventListener("click", async () => {
+      const status = document.getElementById("statusMsg");
+      status.textContent = "⏳ Training new model...";
+      try {
+        const res = await fetch("/train-model", { method: "POST" });
+        if (res.ok) {
+          status.textContent = "✅ Training started. Check server logs for progress.";
+        } else {
+          status.textContent = "❌ Failed to trigger model training.";
+        }
+      } catch (err) {
+        console.error(err);
+        status.textContent = "⚠️ Cannot reach backend.";
+      }
+    });
+  </script>
+
+
+</body>
+
+</html>

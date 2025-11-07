@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 require('dotenv').config();
 
+console.log("🔑 Supabase URL:", process.env.SUPABASE_URL);
+console.log("🔐 Service Role Key loaded:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 const supabase = require('./supabaseClient');
 const app = express();
 const PORT = 5500;
@@ -22,6 +24,19 @@ const transporter = nodemailer.createTransport({
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.get("/test-supabase", async (req, res) => {
+    console.log("🧠 Testing Supabase connection...");
+    const { data, error } = await supabase.from("users").select("id, email").limit(2);
+
+    if (error) {
+        console.error("❌ Supabase error:", error.message);
+        return res.status(500).send("Supabase fetch failed: " + error.message);
+    }
+
+    console.log("✅ Supabase connected. Sample users:", data);
+    res.json(data);
+});
 
 // Send OTP
 app.post('/send-otp', async (req, res) => {
@@ -155,6 +170,30 @@ app.get('/', (req, res) => {
 
 // Serve static files from /public
 app.use(express.static(path.join(__dirname, 'public')));
+
+// --- 🧠 TRAIN MODEL ENDPOINT ---
+const { exec } = require('child_process');
+
+app.post('/train-model', (req, res) => {
+    console.log('🧠 Admin requested model training...');
+
+    const trainScriptPath = path.join(__dirname, 'public', 'train_model.js');
+    console.log('📂 Running training script at:', trainScriptPath);
+
+    exec(`node "${trainScriptPath}"`, (error, stdout, stderr) => {
+        console.log('📜 STDOUT:', stdout);
+        console.error('⚠️ STDERR:', stderr);
+
+        if (error) {
+            console.error('❌ Training failed:', error.message);
+            return res.status(500).send('Training failed: ' + error.message);
+        }
+
+        console.log('✅ Model training finished successfully.');
+        res.send('✅ Model training completed successfully!');
+    });
+});
+
 
 // Start the server
 app.listen(PORT, () => {

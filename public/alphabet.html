@@ -4,209 +4,295 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alphabet & More</title>
+  <title>ASL Alphabet & Numbers | Signify</title>
+
+  <!-- Core Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
   <style>
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .animate-fade-in-up {
-      animation: fadeInUp 0.5s ease-out both;
+    body {
+      font-family: "Inter", sans-serif;
     }
 
     .nav-btn {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
+      justify-content: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
       font-weight: 600;
       color: white;
       border-radius: 8px;
-      background: transparent;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.2s;
+      width: 100%;
+      text-align: left;
     }
 
     .nav-btn:hover,
     .nav-btn.active {
       background: rgba(255, 255, 255, 0.08);
+      transform: translateX(4px);
     }
 
-    .nav-icon {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
+    .letter-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .letter-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 14px rgba(255, 196, 0, 0.15);
+    }
+
+    .modal-bg {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+    }
+
+    #practiceCamera {
+      display: none;
+      border-radius: 10px;
+      margin: 10px auto;
+      border: 2px solid #FFC400;
     }
   </style>
 </head>
 
-<body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] font-inter">
+<body class="flex h-screen bg-gradient-to-br from-[#1C1B2E] via-[#1C1B2E] to-[#14142B] text-white">
+  <!-- Sidebar -->
   <aside class="w-[250px] bg-[#14142b] border-r border-[#2a2a3c] p-6 flex flex-col gap-6">
     <h2 class="text-4xl font-extrabold text-[#FFC400] text-center tracking-wide">Signify</h2>
     <nav class="flex flex-col gap-3 mt-4">
       <button class="nav-btn" onclick="window.location.href='homepage.html'">
-        <img src="img/learn.png" class="nav-icon"> LEARN
+        <i data-lucide="book-open" class="w-5 h-5"></i> LEARN
       </button>
       <button class="nav-btn active">
-        <img src="img/letter.png" class="nav-icon"> ALPHABET & MORE
+        <i data-lucide="type" class="w-5 h-5"></i> ALPHABET & MORE
       </button>
       <button class="nav-btn" onclick="window.location.href='shop.html'">
-        <img src="img/shop.png" class="nav-icon"> SHOP
+        <i data-lucide="shopping-bag" class="w-5 h-5"></i> SHOP
       </button>
       <button class="nav-btn" onclick="window.location.href='profile.html'">
-        <img src="img/profile.png" class="nav-icon"> PROFILE
+        <i data-lucide="user" class="w-5 h-5"></i> PROFILE
       </button>
-
-      <!-- More Button with Dropdown -->
       <div class="relative">
         <button id="moreBtn" class="nav-btn w-full justify-between pr-4">
-          <div class="flex items-center gap-3">
-            <img src="img/more.png" class="nav-icon" />
-            <span>MORE</span>
+          <div class="flex items-center gap-2">
+            <i data-lucide="more-horizontal" class="w-5 h-5"></i> <span>MORE</span>
           </div>
           <svg id="chevron" class="w-4 h-4 transition-transform duration-200 text-white" fill="none"
             stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-
-        <!-- Dropdown Content -->
         <div id="moreDropdown" class="hidden ml-12 mt-1 space-y-1">
-          <button onclick="window.location.href='/landing.html'" class="nav-btn text-red-400 hover:bg-[#3a3a55]">
-            LOGOUT
+          <button onclick="logout()" class="nav-btn text-red-400 hover:bg-[#3a3a55]">
+            <i data-lucide="log-out" class="w-5 h-5"></i> LOGOUT
           </button>
         </div>
       </div>
     </nav>
   </aside>
 
+  <!-- Main -->
   <main class="flex-1 overflow-y-auto px-6 pb-12">
+    <!-- Header Stats -->
     <header
       class="fixed top-6 right-8 flex items-center gap-6 bg-[#2A2A3C] px-6 py-3 rounded-2xl shadow-lg border border-[#C5CAFF] z-20">
-      <div class="flex items-center gap-2 tooltip"><img src="img/flag.png"
-          class="w-7 h-7 rounded-full border-2 border-white" alt="Language"></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="img/fire.png" class="w-7 h-7 animate-pulse"
-          alt="Streak"><span class="streak-value font-bold">0</span></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="img/gem.png" class="w-7 h-7" alt="Gems"><span
-          class="gems-value font-bold">0</span></div>
-      <div class="flex items-center gap-2 tooltip text-white"><img src="img/heart.png" class="w-7 h-7"
-          alt="Hearts"><span class="hearts-value font-bold">0</span></div>
+      <div class="flex items-center gap-2 text-white">
+        <img src="img/fire.png" class="w-7 h-7 animate-pulse" alt="Streak">
+        <span class="streak-value font-bold">0</span>
+      </div>
+      <div class="flex items-center gap-2 text-white">
+        <img src="img/gem.png" class="w-7 h-7" alt="Gems">
+        <span class="gems-value font-bold">0</span>
+      </div>
+      <div class="flex items-center gap-2 text-white">
+        <img src="img/heart.png" class="w-7 h-7" alt="Hearts">
+        <span class="hearts-value font-bold">0</span>
+      </div>
     </header>
 
-    <section class="pt-40">
-      <div class="flex justify-center gap-10 border-b border-gray-700 pb-4">
-        <div
-          class="tab cursor-pointer text-white font-bold uppercase px-4 py-2 border-b-4 border-[#C5CAFF] transition-all duration-300"
-          onclick="switchTab('alphabet')">Alphabet</div>
-        <div class="tab cursor-pointer text-gray-400 hover:text-white px-4 py-2 transition-all duration-300"
-          onclick="switchTab('numbers')">Numbers</div>
-        <div class="tab cursor-pointer text-gray-400 hover:text-white px-4 py-2 transition-all duration-300"
-          onclick="switchTab('words')">Words</div>
-      </div>
+    <!-- Page Title -->
+    <h2 class="text-4xl font-bold mt-40 mb-10 text-center text-[#FFC400]">ASL Alphabet & Numbers</h2>
 
-      <div id="alphabet" class="tab-content grid grid-cols-4 md:grid-cols-6 gap-6 mt-10 justify-items-center"></div>
-      <div id="numbers" class="tab-content hidden grid grid-cols-5 md:grid-cols-10 gap-6 mt-10 justify-items-center">
-      </div>
-      <div id="words" class="tab-content hidden grid grid-cols-2 md:grid-cols-4 gap-6 mt-10 justify-items-center"></div>
+    <!-- Alphabet Section -->
+    <section class="mb-12">
+      <h3 class="text-2xl font-semibold text-[#C5CAFF] mb-6 flex items-center gap-2">
+        <i data-lucide="type" class="w-6 h-6"></i> Alphabet
+      </h3>
+      <div id="alphabetGrid" class="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4 justify-items-center"></div>
+    </section>
+
+    <!-- Numbers Section -->
+    <section>
+      <h3 class="text-2xl font-semibold text-[#C5CAFF] mb-6 flex items-center gap-2">
+        <i data-lucide="hash" class="w-6 h-6"></i> Numbers
+      </h3>
+      <div id="numberGrid" class="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-4 justify-items-center"></div>
     </section>
   </main>
 
-  <div id="letterModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
-    <div class="bg-[#2a2a3c] p-6 rounded-lg text-center text-white max-w-sm w-full relative animate-fade-in-up">
-      <button class="absolute top-2 right-4 text-2xl font-bold hover:text-[#FFC400]"
-        onclick="toggleModal(false)">&times;</button>
-      <img id="modal-img" src="" class="w-full mb-4 rounded">
-      <p id="modal-letter" class="text-3xl font-bold text-[#FFC400]"></p>
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 hidden items-center justify-center modal-bg z-50">
+    <div class="bg-[#2A2A3C] rounded-2xl p-8 w-[90%] max-w-md shadow-lg text-center relative">
+      <button id="closeModal" class="absolute top-4 right-4 text-gray-300 hover:text-white">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <h3 id="modalLetter" class="text-5xl font-bold text-[#FFC400] mb-4"></h3>
+      <img id="modalImage" src="" alt="ASL Sign" class="w-48 h-48 mx-auto mb-6 rounded-lg border border-[#FFC400]" />
+
+      <video id="practiceCamera" width="320" height="240" autoplay playsinline></video>
+      <p id="practiceStatus" class="text-sm text-gray-300 mt-2"></p>
+
+      <button id="practiceBtn"
+        class="bg-[#FFC400] hover:bg-[#ffda66] text-black font-semibold px-5 py-2 rounded-lg flex items-center gap-2 mx-auto transition">
+        <i data-lucide="hand" class="w-5 h-5"></i> Practice This Sign
+      </button>
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
-    const words = ['hello', 'thankyou', 'please', 'goodbye'];
+    lucide.createIcons();
 
-    const moreBtn = document.getElementById('moreBtn');
-    const moreDropdown = document.getElementById('moreDropdown');
-    const chevron = document.getElementById('chevron');
+    const supabase = createClient(
+      "https://lxetbblytlvihitapazv.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4ZXRiYmx5dGx2aWhpdGFwYXp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MzQ1OTgsImV4cCI6MjA2NzMxMDU5OH0.CqDTiPYDmaLouY5EdQHXXTTqZ233RPaa8G8jFFKSZ4g"
+    );
 
-    if (moreBtn && moreDropdown && chevron) {
-      moreBtn.addEventListener('click', () => {
-        moreDropdown.classList.toggle('hidden');
-        chevron.classList.toggle('rotate-180');
-      });
-    }
+    // Sidebar dropdown
+    const moreBtn = document.getElementById("moreBtn");
+    const moreDropdown = document.getElementById("moreDropdown");
+    const chevron = document.getElementById("chevron");
 
-    function createCard(src, label) {
-      return `<div class="bg-[#2a2a3c] p-4 rounded-lg text-center cursor-pointer hover:scale-105 hover:bg-[#383857] transition-transform duration-200 animate-fade-in-up" onclick="openModal('${src}', '${label}')">
-        <img src="${src}" class="w-20 h-20 object-contain mx-auto mb-2">
-        <span class="text-white font-semibold text-lg">${label}</span>
-      </div>`;
-    }
+    moreBtn.addEventListener("click", () => {
+      moreDropdown.classList.toggle("hidden");
+      chevron.classList.toggle("rotate-180");
+    });
 
-    document.getElementById('alphabet').innerHTML = alphabet.map(l => createCard(`signs/${l.toLowerCase()}.png`, l)).join('');
-    document.getElementById('numbers').innerHTML = numbers.map(n => createCard(`signs/${n}.png`, n)).join('');
-    document.getElementById('words').innerHTML = words.map(w => createCard(`signs/${w}.png`, w.charAt(0).toUpperCase() + w.slice(1))).join('');
+    // Load stats
+    async function loadUserStats() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    function openModal(src, label) {
-      document.getElementById('modal-img').src = src;
-      document.getElementById('modal-letter').textContent = label;
-      toggleModal(true);
-    }
+      const { data, error } = await supabase
+        .from("users")
+        .select("hearts, gems, streak")
+        .eq("id", user.id)
+        .single();
 
-    function toggleModal(show) {
-      const modal = document.getElementById('letterModal');
-      modal.classList.toggle('flex', show);
-      modal.classList.toggle('hidden', !show);
-    }
-
-    function switchTab(tab) {
-      ['alphabet', 'numbers', 'words'].forEach(id => {
-        document.getElementById(id).classList.toggle('hidden', id !== tab);
-      });
-      document.querySelectorAll('.tab').forEach(t => {
-        t.classList.remove('text-white', 'border-b-4', 'border-[#C5CAFF]');
-        t.classList.add('text-gray-400');
-      });
-      const activeTab = Array.from(document.querySelectorAll('.tab')).find(t => t.textContent.trim().toLowerCase() === tab);
-      if (activeTab) {
-        activeTab.classList.add('text-white', 'border-b-4', 'border-[#C5CAFF]');
-        activeTab.classList.remove('text-gray-400');
+      if (error) console.error("Stats error:", error);
+      if (data) {
+        document.querySelector(".hearts-value").textContent = data.hearts;
+        document.querySelector(".gems-value").textContent = data.gems;
+        document.querySelector(".streak-value").textContent = data.streak;
       }
     }
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    async function updateUserStatsWithStreakLogic() {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) return;
-      const { data: userData } = await supabase.from('users').select('hearts, gems, streak, last_active').eq('id', user.id).single();
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
-      let updatedStreak = userData.streak || 0;
-      if (userData.last_active) {
-        const lastActiveDate = new Date(userData.last_active);
-        const diffInDays = Math.floor((today - lastActiveDate) / (1000 * 60 * 60 * 24));
-        updatedStreak = diffInDays === 1 ? updatedStreak + 1 : diffInDays > 1 ? 1 : updatedStreak;
-      } else updatedStreak = 1;
-      if (userData.streak !== updatedStreak || userData.last_active?.split('T')[0] !== todayStr) {
-        await supabase.from('users').update({ streak: updatedStreak, last_active: todayStr }).eq('id', user.id);
-      }
-      document.querySelector('.hearts-value').textContent = userData.hearts ?? 0;
-      document.querySelector('.gems-value').textContent = userData.gems ?? 0;
-      document.querySelector('.streak-value').textContent = updatedStreak;
+    loadUserStats();
+
+    // Logout
+    function logout() {
+      supabase.auth.signOut().then(() => (window.location.href = "/landing.html"));
     }
-    updateUserStatsWithStreakLogic();
+
+    // ========== ALPHABET LOGIC ==========
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    const alphabetGrid = document.getElementById("alphabetGrid");
+    const numberGrid = document.getElementById("numberGrid");
+    const modal = document.getElementById("modal");
+    const modalLetter = document.getElementById("modalLetter");
+    const modalImage = document.getElementById("modalImage");
+    const closeModal = document.getElementById("closeModal");
+    const practiceBtn = document.getElementById("practiceBtn");
+    const practiceStatus = document.getElementById("practiceStatus");
+    const cameraEl = document.getElementById("practiceCamera");
+
+    let model, labels, hands, camera;
+    let currentSign = null;
+
+    alphabet.forEach(letter => {
+      const card = document.createElement("div");
+      card.className =
+        "letter-card w-20 h-20 bg-[#2A2A3C] border border-[#C5CAFF] rounded-xl flex items-center justify-center text-3xl font-bold text-[#FFC400] cursor-pointer";
+      card.textContent = letter;
+      card.onclick = () => openModal(letter);
+      alphabetGrid.appendChild(card);
+    });
+
+    numbers.forEach(num => {
+      const card = document.createElement("div");
+      card.className =
+        "letter-card w-20 h-20 bg-[#2A2A3C] border border-[#C5CAFF] rounded-xl flex items-center justify-center text-3xl font-bold text-[#FFC400] cursor-pointer";
+      card.textContent = num;
+      card.onclick = () => openModal(num);
+      numberGrid.appendChild(card);
+    });
+
+    function openModal(value) {
+      currentSign = value;
+      modalLetter.textContent = value;
+      modalImage.src = `img/signs/${value.toLowerCase()}.png`;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    closeModal.onclick = () => {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    };
+
+    // Practice
+    practiceBtn.onclick = async () => {
+      if (!model) {
+        practiceStatus.textContent = "⚠️ Model not loaded yet!";
+        return;
+      }
+
+      cameraEl.style.display = "block";
+      practiceStatus.textContent = "🎥 Starting camera...";
+
+      hands = new Hands({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+      });
+
+      hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.7,
+        minTrackingConfidence: 0.7,
+      });
+
+      hands.onResults(onResults);
+
+      const video = document.createElement("video");
+      video.width = 320;
+      video.height = 240;
+      video.autoplay = true;
+      modal.appendChild(video);
+    };
+
+    function normalize(landmarks) {
+      const base = landmarks[0];
+      return landmarks.flatMap(pt => [pt.x - base.x, pt.y - base.y, pt.z - base.z]);
+    }
+
+    async function onResults(results) {
+      if (!results.multiHandLandmarks?.length) {
+        practiceStatus.textContent = "✋ Show your hand to the camera.";
+        return;
+      }
+    }
   </script>
 </body>
 

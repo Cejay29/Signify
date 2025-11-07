@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Signify Admin</title>
+
+  <!-- Tailwind, Lucide, Supabase, Chart.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script type="module">
+    import { supabase } from "./js/supabaseClient.js";
+
+    lucide.createIcons();
+
+    const totalUsersEl = document.getElementById("totalUsers");
+    const totalLessonsEl = document.getElementById("totalLessons");
+    const totalGesturesEl = document.getElementById("totalGestures");
+    const modelStatusEl = document.getElementById("modelStatus");
+
+    async function loadDashboard() {
+      try {
+        // 👥 Users
+        const { count: userCount } = await supabase.from("users").select("*", { count: "exact", head: true });
+        totalUsersEl.textContent = userCount ?? 0;
+
+        // 📚 Lessons
+        const { count: lessonCount } = await supabase.from("lesson").select("*", { count: "exact", head: true });
+        totalLessonsEl.textContent = lessonCount ?? 0;
+
+        // ✋ Gestures
+        const { count: gestureCount } = await supabase.from("gesture_sample").select("*", { count: "exact", head: true });
+        totalGesturesEl.textContent = gestureCount ?? 0;
+
+        // 🧠 Model Info
+        const { data: models } = await supabase.storage.from("models").list();
+        modelStatusEl.textContent = models?.length
+          ? `${models.length} model(s) uploaded`
+          : "No models uploaded yet.";
+
+        // Load charts and leaderboard
+        loadLeaderboard();
+        loadCharts();
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
+      }
+    }
+
+    async function loadLeaderboard() {
+      const { data, error } = await supabase
+        .from("users")
+        .select("username, xp, streak")
+        .order("xp", { ascending: false })
+        .limit(5);
+
+      if (error) {
+        console.error("Error loading leaderboard:", error);
+        return;
+      }
+
+      const leaderboard = document.getElementById("leaderboardList");
+      leaderboard.innerHTML = data
+        .map(
+          (u, i) => `
+        <li class="flex justify-between py-2 border-b">
+          <span class="flex items-center gap-2">
+            <span class="font-semibold text-indigo-600">#${i + 1}</span> ${u.username}
+          </span>
+          <span class="text-gray-700">${u.xp} XP | 🔥 ${u.streak}</span>
+        </li>`
+        )
+        .join("");
+    }
+
+    async function loadCharts() {
+      const { data: users } = await supabase
+        .from("users")
+        .select("username, xp, streak")
+        .order("xp", { ascending: false })
+        .limit(5);
+
+      if (!users?.length) return;
+
+      // XP Chart
+      const xpChart = document.getElementById("xpChart");
+      new Chart(xpChart, {
+        type: "bar",
+        data: {
+          labels: users.map((u) => u.username),
+          datasets: [
+            {
+              label: "XP Points",
+              data: users.map((u) => u.xp),
+              borderWidth: 2,
+              backgroundColor: "#6366f1",
+            },
+          ],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } },
+        },
+      });
+
+      // Streak Chart
+      const streakChart = document.getElementById("streakChart");
+      new Chart(streakChart, {
+        type: "line",
+        data: {
+          labels: users.map((u) => u.username),
+          datasets: [
+            {
+              label: "Streak (Days)",
+              data: users.map((u) => u.streak),
+              borderWidth: 2,
+              borderColor: "#f97316",
+              fill: false,
+              tension: 0.3,
+            },
+          ],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } },
+        },
+      });
+    }
+
+    // 🚪 Logout Function
+    window.logout = async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        alert("Logout failed. Please try again.");
+        console.error(error);
+      } else {
+        window.location.href = "login.html"; // Redirect to login
+      }
+    };
+
+    loadDashboard();
+  </script>
+</head>
+
+<body class="bg-gray-100 flex min-h-screen text-gray-800">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-lg flex flex-col">
+    <div class="p-6 border-b flex items-center gap-2">
+      <i data-lucide="brain" class="w-6 h-6 text-indigo-600"></i>
+      <h1 class="text-2xl font-bold text-indigo-600">Signify Admin</h1>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-2 text-gray-700">
+      <a href="admin.html" class="flex items-center gap-2 p-2 rounded bg-indigo-100 text-indigo-600 font-semibold">
+        <i data-lucide="home" class="w-5 h-5"></i> Dashboard
+      </a>
+      <a href="lessons.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="book-open" class="w-5 h-5"></i> Manage Lessons
+      </a>
+      <a href="gestures.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="hand" class="w-5 h-5"></i> Gestures
+      </a>
+      <a href="users.html" class="flex items-center gap-2 p-2 rounded hover:bg-indigo-100">
+        <i data-lucide="users" class="w-5 h-5"></i> Users
+      </a>
+    </nav>
+
+    <!-- Logout Button -->
+    <div class="p-4 border-t">
+      <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded transition">
+        <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-8 space-y-6">
+    <h2 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+      <i data-lucide="bar-chart-3" class="w-7 h-7 text-indigo-600"></i> Dashboard Overview
+    </h2>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="bg-white shadow rounded-lg p-5 flex flex-col items-center">
+        <i data-lucide="users" class="w-8 h-8 text-indigo-600 mb-2"></i>
+        <p class="text-gray-500 text-sm">Total Users</p>
+        <h3 id="totalUsers" class="text-2xl font-bold text-gray-800">0</h3>
+      </div>
+      <div class="bg-white shadow rounded-lg p-5 flex flex-col items-center">
+        <i data-lucide="book-open" class="w-8 h-8 text-green-600 mb-2"></i>
+        <p class="text-gray-500 text-sm">Total Lessons</p>
+        <h3 id="totalLessons" class="text-2xl font-bold text-gray-800">0</h3>
+      </div>
+      <div class="bg-white shadow rounded-lg p-5 flex flex-col items-center">
+        <i data-lucide="hand" class="w-8 h-8 text-yellow-600 mb-2"></i>
+        <p class="text-gray-500 text-sm">Total Gestures</p>
+        <h3 id="totalGestures" class="text-2xl font-bold text-gray-800">0</h3>
+      </div>
+      <div class="bg-white shadow rounded-lg p-5 flex flex-col items-center">
+        <i data-lucide="cpu" class="w-8 h-8 text-purple-600 mb-2"></i>
+        <p class="text-gray-500 text-sm">Model Status</p>
+        <h3 id="modelStatus" class="text-base font-semibold text-gray-700 text-center">Loading...</h3>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <i data-lucide="activity" class="w-5 h-5 text-indigo-600"></i> XP Leaderboard
+        </h3>
+        <canvas id="xpChart" height="200"></canvas>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <i data-lucide="flame" class="w-5 h-5 text-orange-500"></i> Streak Leaderboard
+        </h3>
+        <canvas id="streakChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <i data-lucide="trophy" class="w-5 h-5 text-yellow-500"></i> Top 5 Learners
+      </h3>
+      <ul id="leaderboardList" class="text-sm text-gray-700"></ul>
+    </div>
+  </main>
+</body>
+</html>
